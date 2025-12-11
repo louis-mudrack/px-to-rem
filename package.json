@@ -5,11 +5,30 @@
   "icon": "logo.jpg",
   "version": "1.0.1",
   "publisher": "LouisMudrack",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/louis-mudrack/px-to-rem"
+  },
+  "homepage": "https://github.com/louis-mudrack/px-to-rem#readme",
+  "bugs": {
+    "url": "https://github.com/louis-mudrack/px-to-rem/issues"
+  },
   "engines": {
     "vscode": "^1.74.0"
   },
   "categories": [
+    "Formatters",
     "Other"
+  ],
+  "keywords": [
+    "px",
+    "rem",
+    "css",
+    "scss",
+    "sass",
+    "converter",
+    "responsive",
+    "accessibility"
   ],
   "activationEvents": [
     "onCommand:px-to-rem.convert",
