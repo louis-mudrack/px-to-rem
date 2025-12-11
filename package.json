@@ -5,6 +5,7 @@
   "icon": "logo.jpg",
   "version": "1.0.1",
   "publisher": "LouisMudrack",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/louis-mudrack/px-to-rem"
