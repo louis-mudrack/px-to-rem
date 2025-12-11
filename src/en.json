@@ -1,0 +1,96 @@
+{
+  "extension": {
+    "name": "PX to REM() Converter"
+  },
+  "commands": {
+    "convert": "Convert PX to REM (without px)",
+    "convertWithPx": "Convert PX to REM (with px)",
+    "convertWorkspace": "PX to REM: Convert all files in workspace",
+    "convertFileType": "PX to REM: Convert all files of specific type",
+    "switchProfile": "PX to REM: Switch configuration profile",
+    "convertSelection": "PX to REM: Convert selection only",
+    "reverseConvert": "REM to PX: Reverse conversion",
+    "exportSettings": "PX to REM: Export settings",
+    "importSettings": "PX to REM: Import settings"
+  },
+  "messages": {
+    "noEditor": "No active editor found!",
+    "noSelection": "No selection present. Use Ctrl+K for entire file.",
+    "convertedValues": "✅ {{count}} px value converted to {{format}}!",
+    "convertedValues_plural": "✅ {{count}} px values converted to {{format}}!",
+    "convertedWithStats": "✅ {{count}} px value converted to {{format}}! ({{skipped}} skipped, {{duration}}ms)",
+    "convertedWithStats_plural": "✅ {{count}} px values converted to {{format}}! ({{skipped}} skipped, {{duration}}ms)",
+    "reverseConverted": "✅ {{count}} rem value converted back to px!",
+    "reverseConverted_plural": "✅ {{count}} rem values converted back to px!",
+    "conversionError": "Error converting values.",
+    "settingsExported": "✅ Settings exported! Save the file to share it.",
+    "settingsImported": "✅ Settings successfully imported!",
+    "profileActivated": "✅ Profile \"{{name}}\" activated!",
+    "invalidJson": "❌ Import error: Invalid JSON format.",
+    "openJsonFile": "Please open a JSON file with the settings.",
+    "noFilesFound": "No CSS/SCSS files found.",
+    "filesFound": "{{count}} file found. Convert all?",
+    "filesFound_plural": "{{count}} files found. Convert all?",
+    "yes": "Yes",
+    "no": "No",
+    "progressTitle": "Converting PX to REM",
+    "workspaceConverted": "✅ {{converted}} px values in {{files}} file converted!",
+    "workspaceConverted_plural": "✅ {{converted}} px values in {{files}} files converted!",
+    "selectFileType": "Select file type to convert",
+    "allTypes": "All types",
+    "fileTypeConverted": "✅ {{converted}} px values in {{files}} {{fileType}} file converted!",
+    "fileTypeConverted_plural": "✅ {{converted}} px values in {{files}} {{fileType}} files converted!",
+    "convertedInLine": "✅ {{count}} px value converted!",
+    "convertedInLine_plural": "✅ {{count}} px values converted!"
+  },
+  "profiles": {
+    "scssFunction": {
+      "label": "🎨 SCSS Function",
+      "description": "rem(16) with SCSS interpolation"
+    },
+    "directConversion": {
+      "label": "📐 Direct Conversion",
+      "description": "1rem direct calculation"
+    },
+    "scssWithPx": {
+      "label": "🔧 SCSS with px",
+      "description": "rem(16px) format"
+    },
+    "minimal": {
+      "label": "⚡ Minimal",
+      "description": "Only large values (>=8px), no borders"
+    }
+  },
+  "settings": {
+    "directConversion": "Convert directly to rem (16px → 1rem instead of rem(16))",
+    "baseFontSize": "Base font size for calculation (default: 16px = 1rem)",
+    "minValue": "Minimum px value to convert (e.g., 4 to skip 1-3px)",
+    "maxValue": "Maximum px value to convert (e.g., 999 to skip large values like 1920px)",
+    "includeProperties": "Convert only these properties (e.g., ['font-size', 'padding', 'margin']). Empty = all.",
+    "excludeProperties": "Do NOT convert these properties (e.g., ['border-width', 'outline-width'])",
+    "keepPxInRem": "Keep px unit in rem() (rem(10px) instead of rem(10))",
+    "preserveZero": "Keep 0px as 0 (don't convert to rem(0))",
+    "scssInterpolation": "Use SCSS interpolation in calc() (#{rem(10)} instead of rem(10))",
+    "enableDiagnostics": "Show warnings for px values (underlines px values)",
+    "enableCodeLens": "Show 'Convert' buttons above lines with px values",
+    "diagnosticSeverity": "Severity of px value diagnostics",
+    "excludePatterns": "Regex patterns to skip lines (e.g., '//.*no-convert')",
+    "excludeFiles": "Glob patterns for files to ignore (e.g., '**/*.min.css', '**/vendor/**')",
+    "fileTypes": "File types to consider in batch conversion"
+  },
+  "diagnostics": {
+    "useRem": "Use rem instead of px",
+    "useRemInstead": "Use {{preview}} instead of {{value}}"
+  },
+  "codeLens": {
+    "convertValues": "Convert {{count}} px value to rem",
+    "convertValues_plural": "Convert {{count}} px values to rem"
+  },
+  "quickFix": {
+    "convertTo": "Convert to {{value}}",
+    "convertAllInLine": "Convert all {{count}} px values in this line"
+  },
+  "hover": {
+    "pressToConvert": "\n\n💡 Press `Ctrl+K` to convert"
+  }
+}

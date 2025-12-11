@@ -1,0 +1,96 @@
+{
+  "extension": {
+    "name": "PX zu REM() Konverter"
+  },
+  "commands": {
+    "convert": "PX zu REM konvertieren (ohne px)",
+    "convertWithPx": "PX zu REM konvertieren (mit px)",
+    "convertWorkspace": "PX zu REM: Alle Dateien im Workspace konvertieren",
+    "convertFileType": "PX zu REM: Alle Dateien eines bestimmten Types konvertieren",
+    "switchProfile": "PX zu REM: Profil wechseln",
+    "convertSelection": "PX zu REM: Nur Selektion konvertieren",
+    "reverseConvert": "REM zu PX: Rückwärts konvertieren",
+    "exportSettings": "PX zu REM: Einstellungen exportieren",
+    "importSettings": "PX zu REM: Einstellungen importieren"
+  },
+  "messages": {
+    "noEditor": "Kein aktiver Editor gefunden!",
+    "noSelection": "Keine Selektion vorhanden. Nutze Ctrl+K für gesamte Datei.",
+    "convertedValues": "✅ {{count}} px-Wert in {{format}} konvertiert!",
+    "convertedValues_plural": "✅ {{count}} px-Werte in {{format}} konvertiert!",
+    "convertedWithStats": "✅ {{count}} px-Wert in {{format}} konvertiert! ({{skipped}} übersprungen, {{duration}}ms)",
+    "convertedWithStats_plural": "✅ {{count}} px-Werte in {{format}} konvertiert! ({{skipped}} übersprungen, {{duration}}ms)",
+    "reverseConverted": "✅ {{count}} rem-Wert zurück zu px konvertiert!",
+    "reverseConverted_plural": "✅ {{count}} rem-Werte zurück zu px konvertiert!",
+    "conversionError": "Fehler beim Konvertieren der Werte.",
+    "settingsExported": "✅ Einstellungen exportiert! Speichere die Datei um sie zu teilen.",
+    "settingsImported": "✅ Einstellungen erfolgreich importiert!",
+    "profileActivated": "✅ Profil \"{{name}}\" aktiviert!",
+    "invalidJson": "❌ Fehler beim Importieren: Ungültiges JSON-Format.",
+    "openJsonFile": "Bitte öffne eine JSON-Datei mit den Einstellungen.",
+    "noFilesFound": "Keine CSS/SCSS Dateien gefunden.",
+    "filesFound": "{{count}} Datei gefunden. Alle konvertieren?",
+    "filesFound_plural": "{{count}} Dateien gefunden. Alle konvertieren?",
+    "yes": "Ja",
+    "no": "Nein",
+    "progressTitle": "PX zu REM konvertieren",
+    "workspaceConverted": "✅ {{converted}} px-Werte in {{files}} Datei konvertiert!",
+    "workspaceConverted_plural": "✅ {{converted}} px-Werte in {{files}} Dateien konvertiert!",
+    "selectFileType": "Wähle Dateityp zum Konvertieren",
+    "allTypes": "Alle Typen",
+    "fileTypeConverted": "✅ {{converted}} px-Werte in {{files}} {{fileType}}-Datei konvertiert!",
+    "fileTypeConverted_plural": "✅ {{converted}} px-Werte in {{files}} {{fileType}}-Dateien konvertiert!",
+    "convertedInLine": "✅ {{count}} px-Wert konvertiert!",
+    "convertedInLine_plural": "✅ {{count}} px-Werte konvertiert!"
+  },
+  "profiles": {
+    "scssFunction": {
+      "label": "🎨 SCSS Funktion",
+      "description": "rem(16) mit SCSS Interpolation"
+    },
+    "directConversion": {
+      "label": "📐 Direct Conversion",
+      "description": "1rem direkte Umrechnung"
+    },
+    "scssWithPx": {
+      "label": "🔧 SCSS mit px",
+      "description": "rem(16px) Format"
+    },
+    "minimal": {
+      "label": "⚡ Minimal",
+      "description": "Nur große Werte (>=8px), keine Borders"
+    }
+  },
+  "settings": {
+    "directConversion": "Direkt in rem umrechnen (16px → 1rem statt rem(16))",
+    "baseFontSize": "Basis-Schriftgröße für Berechnung (Standard: 16px = 1rem)",
+    "minValue": "Minimaler px-Wert zum Konvertieren (z.B. 4 um 1-3px zu überspringen)",
+    "maxValue": "Maximaler px-Wert zum Konvertieren (z.B. 999 um große Werte wie 1920px zu überspringen)",
+    "includeProperties": "Nur diese Properties konvertieren (z.B. ['font-size', 'padding', 'margin']). Leer = alle.",
+    "excludeProperties": "Diese Properties NICHT konvertieren (z.B. ['border-width', 'outline-width'])",
+    "keepPxInRem": "Px-Einheit in rem() behalten (rem(10px) statt rem(10))",
+    "preserveZero": "0px als 0 behalten (nicht zu rem(0) konvertieren)",
+    "scssInterpolation": "SCSS Interpolation in calc() verwenden (#{rem(10)} statt rem(10))",
+    "enableDiagnostics": "Zeigt Warnungen bei px-Werten an (unterstreicht px-Werte)",
+    "enableCodeLens": "Zeigt 'Convert' Buttons über Zeilen mit px-Werten",
+    "diagnosticSeverity": "Schweregrad der px-Wert Diagnostics",
+    "excludePatterns": "Regex-Muster für Zeilen, die übersprungen werden sollen",
+    "excludeFiles": "Glob patterns für Dateien die ignoriert werden sollen (z.B. '**/*.min.css', '**/vendor/**')",
+    "fileTypes": "Dateitypen die bei Batch-Konvertierung berücksichtigt werden"
+  },
+  "diagnostics": {
+    "useRem": "Nutze rem statt px",
+    "useRemInstead": "Nutze {{preview}} statt {{value}}"
+  },
+  "codeLens": {
+    "convertValues": "{{count}} px-Wert zu rem konvertieren",
+    "convertValues_plural": "{{count}} px-Werte zu rem konvertieren"
+  },
+  "quickFix": {
+    "convertTo": "Konvertieren zu {{value}}",
+    "convertAllInLine": "Alle {{count}} px-Werte in dieser Zeile konvertieren"
+  },
+  "hover": {
+    "pressToConvert": "\n\n💡 Drücke `Ctrl+K` zum Konvertieren"
+  }
+}

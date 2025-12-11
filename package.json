@@ -1,0 +1,213 @@
+{
+  "name": "px-to-rem-function",
+  "displayName": "PX to REM() Converter",
+  "description": "Konvertiert alle px-Werte in rem() Funktionen per Hotkey",
+  "icon": "logo.jpg",
+  "version": "1.0.1",
+  "publisher": "LouisMudrack",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:px-to-rem.convert",
+    "onCommand:px-to-rem.convertWithPx",
+    "onCommand:px-to-rem.convertWorkspace",
+    "onCommand:px-to-rem.switchProfile",
+    "onCommand:px-to-rem.convertSelection",
+    "onCommand:px-to-rem.reverseConvert",
+    "onCommand:px-to-rem.exportSettings",
+    "onCommand:px-to-rem.importSettings",
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "px-to-rem.convert",
+        "title": "PX zu REM konvertieren (ohne px)"
+      },
+      {
+        "command": "px-to-rem.convertWithPx",
+        "title": "PX zu REM konvertieren (mit px)"
+      },
+      {
+        "command": "px-to-rem.convertWorkspace",
+        "title": "PX zu REM: Alle Dateien im Workspace konvertieren"
+      },
+      {
+        "command": "px-to-rem.switchProfile",
+        "title": "PX zu REM: Profil wechseln"
+      },
+      {
+        "command": "px-to-rem.convertSelection",
+        "title": "PX zu REM: Nur Selektion konvertieren"
+      },
+      {
+        "command": "px-to-rem.reverseConvert",
+        "title": "REM zu PX: Rückwärts konvertieren"
+      },
+      {
+        "command": "px-to-rem.exportSettings",
+        "title": "PX zu REM: Einstellungen exportieren"
+      },
+      {
+        "command": "px-to-rem.importSettings",
+        "title": "PX zu REM: Einstellungen importieren"
+      },
+      {
+        "command": "px-to-rem.convertFileType",
+        "title": "PX zu REM: Alle Dateien eines bestimmten Types konvertieren"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "px-to-rem.convert",
+        "key": "ctrl+k",
+        "mac": "cmd+k",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "px-to-rem.convertWithPx",
+        "key": "ctrl+oem_7",
+        "mac": "cmd+oem_7",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "px-to-rem.convertSelection",
+        "key": "ctrl+shift+k",
+        "mac": "cmd+shift+k",
+        "when": "editorTextFocus && editorHasSelection"
+      }
+    ],
+    "configuration": {
+      "title": "PX to REM Converter",
+      "properties": {
+        "pxToRem.directConversion": {
+          "type": "boolean",
+          "default": false,
+          "description": "Direkt in rem umrechnen (16px → 1rem statt rem(16))"
+        },
+        "pxToRem.baseFontSize": {
+          "type": "number",
+          "default": 16,
+          "description": "Basis-Schriftgröße für Berechnung (Standard: 16px = 1rem)"
+        },
+        "pxToRem.minValue": {
+          "type": "number",
+          "default": 0,
+          "description": "Minimaler px-Wert zum Konvertieren (z.B. 4 um 1px, 2px, 3px zu überspringen)"
+        },
+        "pxToRem.maxValue": {
+          "type": "number",
+          "default": 9999,
+          "description": "Maximaler px-Wert zum Konvertieren (z.B. 999 um große Werte wie 1920px zu überspringen)"
+        },
+        "pxToRem.includeProperties": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Nur diese Properties konvertieren (z.B. ['font-size', 'padding', 'margin']). Leer = alle."
+        },
+        "pxToRem.excludeProperties": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Diese Properties NICHT konvertieren (z.B. ['border-width', 'outline-width'])"
+        },
+        "pxToRem.keepPxInRem": {
+          "type": "boolean",
+          "default": false,
+          "description": "Px-Einheit in rem() behalten (rem(10px) statt rem(10))"
+        },
+        "pxToRem.preserveZero": {
+          "type": "boolean",
+          "default": false,
+          "description": "0px als 0 behalten (nicht zu rem(0) konvertieren)"
+        },
+        "pxToRem.scssInterpolation": {
+          "type": "boolean",
+          "default": false,
+          "description": "SCSS Interpolation in calc() verwenden (#{rem(10)} statt rem(10))"
+        },
+        "pxToRem.enableDiagnostics": {
+          "type": "boolean",
+          "default": false,
+          "description": "Zeigt Warnungen bei px-Werten an (unterstreicht px-Werte)"
+        },
+        "pxToRem.enableCodeLens": {
+          "type": "boolean",
+          "default": true,
+          "description": "Zeigt 'Convert' Buttons über Zeilen mit px-Werten"
+        },
+        "pxToRem.diagnosticSeverity": {
+          "type": "string",
+          "enum": [
+            "error",
+            "warning",
+            "information",
+            "hint"
+          ],
+          "default": "information",
+          "description": "Schweregrad der px-Wert Diagnostics"
+        },
+        "pxToRem.excludePatterns": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Regex-Muster für Zeilen, die übersprungen werden sollen"
+        },
+        "pxToRem.excludeFiles": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Glob patterns für Dateien die ignoriert werden sollen (z.B. '**/*.min.css', '**/vendor/**')"
+        },
+        "pxToRem.fileTypes": {
+          "type": "array",
+          "default": [
+            "css",
+            "scss",
+            "sass",
+            "less"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Dateitypen die bei Batch-Konvertierung berücksichtigt werden"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile && npm run copy-locales",
+    "compile": "tsc -p ./",
+    "copy-locales": "node -e \"const fs = require('fs'); const path = require('path'); const src = path.join('src', 'locales'); const dest = path.join('out', 'locales'); if (!fs.existsSync(dest)) { fs.mkdirSync(dest, { recursive: true }); } fs.readdirSync(src).forEach(file => { if (file.endsWith('.json')) { fs.copyFileSync(path.join(src, file), path.join(dest, file)); } });\"",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "18.x",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "eslint": "^8.47.0",
+    "typescript": "^5.1.6",
+    "@types/minimatch": "^5.1.2"
+  },
+  "dependencies": {
+    "minimatch": "^10.1.1"
+  }
+}
