@@ -27,7 +27,7 @@
   "config.excludePatterns": "Regex patterns to skip lines (e.g., '//.*no-convert')",
   "config.excludeFiles": "Glob patterns for files to ignore (e.g., '**/*.min.css', '**/vendor/**')",
   "config.fileTypes": "File types to consider in batch conversion",
-  "config.enableReverseHover": "Show px values when hovering over rem/rem() (e.g., 2rem → 32px)",
+  "config.enableInlayHints": "Show px values after rem/rem() (e.g., 2rem → 32px)",
   "config.useDynamicBaseFontSize": "Read base font size from SCSS/CSS file instead of using fixed value",
   "config.baseFontSizeFile": "Path to file with baseFontSize variable (relative to workspace root)",
   "config.baseFontSizeVariable": "Name of the variable for base font size (e.g., '$base-font-size' or '--base-font-size')"

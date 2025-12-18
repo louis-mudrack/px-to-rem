@@ -11,38 +11,53 @@ export async function parseBaseFontSize(
         const fullPath = path.join(workspaceFolder.uri.fsPath, filePath);
         
         if (!fs.existsSync(fullPath)) {
-            console.warn(`baseFontSize file not found: ${fullPath}`);
             return null;
         }
 
         const content = fs.readFileSync(fullPath, 'utf-8');
         
         if (variableName.startsWith('$')) {
-            const scssPattern = new RegExp(
+            const withPxPattern = new RegExp(
                 `\\${variableName}\\s*:\\s*(\\d+(?:\\.\\d+)?)px`,
                 'i'
             );
-            const match = content.match(scssPattern);
+            const match = content.match(withPxPattern);
             if (match) {
                 return parseFloat(match[1]);
+            }
+            
+            const withoutPxPattern = new RegExp(
+                `\\${variableName}\\s*:\\s*(\\d+(?:\\.\\d+)?);`,
+                'i'
+            );
+            const matchNoPx = content.match(withoutPxPattern);
+            if (matchNoPx) {
+                return parseFloat(matchNoPx[1]);
             }
         }
         
         if (variableName.startsWith('--')) {
-            const cssPattern = new RegExp(
+            const withPxPattern = new RegExp(
                 `${variableName}\\s*:\\s*(\\d+(?:\\.\\d+)?)px`,
                 'i'
             );
-            const match = content.match(cssPattern);
+            const match = content.match(withPxPattern);
             if (match) {
                 return parseFloat(match[1]);
             }
+            
+            const withoutPxPattern = new RegExp(
+                `${variableName}\\s*:\\s*(\\d+(?:\\.\\d+)?);`,
+                'i'
+            );
+            const matchNoPx = content.match(withoutPxPattern);
+            if (matchNoPx) {
+                return parseFloat(matchNoPx[1]);
+            }
         }
 
-        console.warn(`Variable ${variableName} not found in ${fullPath}`);
         return null;
-    } catch (error) {
-        console.error(`Error parsing baseFontSize from ${filePath}:`, error);
+    } catch {
         return null;
     }
 }

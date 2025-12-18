@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "logo.jpg",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "publisher": "LouisMudrack",
   "license": "MIT",
   "repository": {
@@ -206,10 +206,10 @@
           },
           "description": "%config.fileTypes%"
         },
-        "pxToRem.enableReverseHover": {
+        "pxToRem.enableInlayHints": {
           "type": "boolean",
           "default": true,
-          "description": "%config.enableReverseHover%"
+          "description": "%config.enableInlayHints%"
         },
         "pxToRem.useDynamicBaseFontSize": {
           "type": "boolean",

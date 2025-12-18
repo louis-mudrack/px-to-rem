@@ -21,7 +21,7 @@ export interface ExtensionConfig {
     enableDiagnostics: boolean;
     enableCodeLens: boolean;
     diagnosticSeverity: string;
-    enableReverseHover: boolean;
+    enableInlayHints: boolean;
     useDynamicBaseFontSize: boolean;
     baseFontSizeFile: string;
     baseFontSizeVariable: string;

@@ -27,7 +27,7 @@ function getConfig(): ExtensionConfig {
         enableDiagnostics: config.get<boolean>('enableDiagnostics', false),
         enableCodeLens: config.get<boolean>('enableCodeLens', true),
         diagnosticSeverity: config.get<string>('diagnosticSeverity', 'information'),
-        enableReverseHover: config.get<boolean>('enableReverseHover', true),
+        enableInlayHints: config.get<boolean>('enableInlayHints', true),
         useDynamicBaseFontSize: config.get<boolean>('useDynamicBaseFontSize', false),
         baseFontSizeFile: config.get<string>('baseFontSizeFile', 'src/styles/variables.scss'),
         baseFontSizeVariable: config.get<string>('baseFontSizeVariable', '$base-font-size')
@@ -840,7 +840,7 @@ function providePxHover(document: vscode.TextDocument, position: vscode.Position
         }
     }
     
-    if (config.enableReverseHover) {
+    if (config.enableInlayHints) {
         const remFuncRange = document.getWordRangeAtPosition(position, /rem\((-?\d+(?:\.\d+)?)(px)?\)/);
         if (remFuncRange) {
             const word = document.getText(remFuncRange);
@@ -883,6 +883,70 @@ function providePxHover(document: vscode.TextDocument, position: vscode.Position
     }
     
     return undefined;
+}
+
+class PxToRemInlayHintsProvider implements vscode.InlayHintsProvider {
+    provideInlayHints(
+        document: vscode.TextDocument,
+        range: vscode.Range
+    ): vscode.InlayHint[] {
+        const config = getConfig();
+        
+        if (!config.enableInlayHints) {
+            return [];
+        }
+        
+        const hints: vscode.InlayHint[] = [];
+        const text = document.getText(range);
+        const actualBaseFontSize = getActualBaseFontSize(config);
+        const startOffset = document.offsetAt(range.start);
+        
+        const remFuncRegex = /rem\((-?\d+(?:\.\d+)?)(px)?\)/g;
+        let match;
+        
+        while ((match = remFuncRegex.exec(text)) !== null) {
+            const value = parseFloat(match[1]);
+            const hasPx = !!match[2];
+            const pxValue = hasPx ? value : Math.round(value * actualBaseFontSize);
+            
+            const absoluteOffset = startOffset + match.index + match[0].length;
+            const position = document.positionAt(absoluteOffset);
+            
+            const hint = new vscode.InlayHint(
+                position,
+                ` → ${pxValue}px`,
+                vscode.InlayHintKind.Type
+            );
+            hint.paddingLeft = true;
+            hint.tooltip = hasPx 
+                ? `${match[0]} = ${(value / actualBaseFontSize).toFixed(3)}rem = ${pxValue}px`
+                : `${match[0]} = ${pxValue}px (base: ${actualBaseFontSize}px)`;
+            
+            hints.push(hint);
+        }
+        
+        const remRegex = /(-?\d+(?:\.\d+)?)rem\b/g;
+        
+        while ((match = remRegex.exec(text)) !== null) {
+            const remValue = parseFloat(match[1]);
+            const pxValue = Math.round(remValue * actualBaseFontSize);
+            
+            const absoluteOffset = startOffset + match.index + match[0].length;
+            const position = document.positionAt(absoluteOffset);
+            
+            const hint = new vscode.InlayHint(
+                position,
+                ` → ${pxValue}px`,
+                vscode.InlayHintKind.Type
+            );
+            hint.paddingLeft = true;
+            hint.tooltip = `${match[0]} = ${pxValue}px (base: ${actualBaseFontSize}px)`;
+            
+            hints.push(hint);
+        }
+        
+        return hints;
+    }
 }
 
 class PxToRemCodeLensProvider implements vscode.CodeLensProvider {
@@ -1190,6 +1254,11 @@ export function activate(context: vscode.ExtensionContext): void {
         }
     );
 
+    const inlayHintsProvider = vscode.languages.registerInlayHintsProvider(
+        ['css', 'scss', 'sass', 'less'],
+        new PxToRemInlayHintsProvider()
+    );
+
     context.subscriptions.push(
         convertCommand, 
         convertWithPxCommand, 
@@ -1203,7 +1272,8 @@ export function activate(context: vscode.ExtensionContext): void {
         convertLineCommand,
         hoverProvider,
         codeLensProvider,
-        codeActionProvider
+        codeActionProvider,
+        inlayHintsProvider
     );
 
     updateStatusBar();
