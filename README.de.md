@@ -1,6 +1,6 @@
 # PX zu REM Konverter
 
-[![Version](https://img.shields.io/badge/version-1.0.1-blue.svg)](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
 [![English](https://img.shields.io/badge/lang-en-red.svg)](README.md)
 [![Sprache](https://img.shields.io/badge/lang-de-green.svg)](README.de.md)
 

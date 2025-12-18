@@ -1,9 +1,9 @@
 {
   "name": "px-to-rem-function",
-  "displayName": "PX to REM() Converter",
-  "description": "Konvertiert alle px-Werte in rem() Funktionen per Hotkey",
+  "displayName": "%displayName%",
+  "description": "%description%",
   "icon": "logo.jpg",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "publisher": "LouisMudrack",
   "license": "MIT",
   "repository": {
@@ -47,39 +47,39 @@
     "commands": [
       {
         "command": "px-to-rem.convert",
-        "title": "PX zu REM konvertieren (ohne px)"
+        "title": "%command.convert%"
       },
       {
         "command": "px-to-rem.convertWithPx",
-        "title": "PX zu REM konvertieren (mit px)"
+        "title": "%command.convertWithPx%"
       },
       {
         "command": "px-to-rem.convertWorkspace",
-        "title": "PX zu REM: Alle Dateien im Workspace konvertieren"
+        "title": "%command.convertWorkspace%"
       },
       {
         "command": "px-to-rem.switchProfile",
-        "title": "PX zu REM: Profil wechseln"
+        "title": "%command.switchProfile%"
       },
       {
         "command": "px-to-rem.convertSelection",
-        "title": "PX zu REM: Nur Selektion konvertieren"
+        "title": "%command.convertSelection%"
       },
       {
         "command": "px-to-rem.reverseConvert",
-        "title": "REM zu PX: Rückwärts konvertieren"
+        "title": "%command.reverseConvert%"
       },
       {
         "command": "px-to-rem.exportSettings",
-        "title": "PX zu REM: Einstellungen exportieren"
+        "title": "%command.exportSettings%"
       },
       {
         "command": "px-to-rem.importSettings",
-        "title": "PX zu REM: Einstellungen importieren"
+        "title": "%command.importSettings%"
       },
       {
         "command": "px-to-rem.convertFileType",
-        "title": "PX zu REM: Alle Dateien eines bestimmten Types konvertieren"
+        "title": "%command.convertFileType%"
       }
     ],
     "keybindings": [
@@ -108,22 +108,22 @@
         "pxToRem.directConversion": {
           "type": "boolean",
           "default": false,
-          "description": "Direkt in rem umrechnen (16px → 1rem statt rem(16))"
+          "description": "%config.directConversion%"
         },
         "pxToRem.baseFontSize": {
           "type": "number",
           "default": 16,
-          "description": "Basis-Schriftgröße für Berechnung (Standard: 16px = 1rem)"
+          "description": "%config.baseFontSize%"
         },
         "pxToRem.minValue": {
           "type": "number",
           "default": 0,
-          "description": "Minimaler px-Wert zum Konvertieren (z.B. 4 um 1px, 2px, 3px zu überspringen)"
+          "description": "%config.minValue%"
         },
         "pxToRem.maxValue": {
           "type": "number",
           "default": 9999,
-          "description": "Maximaler px-Wert zum Konvertieren (z.B. 999 um große Werte wie 1920px zu überspringen)"
+          "description": "%config.maxValue%"
         },
         "pxToRem.includeProperties": {
           "type": "array",
@@ -131,7 +131,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Nur diese Properties konvertieren (z.B. ['font-size', 'padding', 'margin']). Leer = alle."
+          "description": "%config.includeProperties%"
         },
         "pxToRem.excludeProperties": {
           "type": "array",
@@ -139,32 +139,32 @@
           "items": {
             "type": "string"
           },
-          "description": "Diese Properties NICHT konvertieren (z.B. ['border-width', 'outline-width'])"
+          "description": "%config.excludeProperties%"
         },
         "pxToRem.keepPxInRem": {
           "type": "boolean",
           "default": false,
-          "description": "Px-Einheit in rem() behalten (rem(10px) statt rem(10))"
+          "description": "%config.keepPxInRem%"
         },
         "pxToRem.preserveZero": {
           "type": "boolean",
           "default": false,
-          "description": "0px als 0 behalten (nicht zu rem(0) konvertieren)"
+          "description": "%config.preserveZero%"
         },
         "pxToRem.scssInterpolation": {
           "type": "boolean",
           "default": false,
-          "description": "SCSS Interpolation in calc() verwenden (#{rem(10)} statt rem(10))"
+          "description": "%config.scssInterpolation%"
         },
         "pxToRem.enableDiagnostics": {
           "type": "boolean",
           "default": false,
-          "description": "Zeigt Warnungen bei px-Werten an (unterstreicht px-Werte)"
+          "description": "%config.enableDiagnostics%"
         },
         "pxToRem.enableCodeLens": {
           "type": "boolean",
           "default": true,
-          "description": "Zeigt 'Convert' Buttons über Zeilen mit px-Werten"
+          "description": "%config.enableCodeLens%"
         },
         "pxToRem.diagnosticSeverity": {
           "type": "string",
@@ -175,7 +175,7 @@
             "hint"
           ],
           "default": "information",
-          "description": "Schweregrad der px-Wert Diagnostics"
+          "description": "%config.diagnosticSeverity%"
         },
         "pxToRem.excludePatterns": {
           "type": "array",
@@ -183,7 +183,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Regex-Muster für Zeilen, die übersprungen werden sollen"
+          "description": "%config.excludePatterns%"
         },
         "pxToRem.excludeFiles": {
           "type": "array",
@@ -191,7 +191,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Glob patterns für Dateien die ignoriert werden sollen (z.B. '**/*.min.css', '**/vendor/**')"
+          "description": "%config.excludeFiles%"
         },
         "pxToRem.fileTypes": {
           "type": "array",
@@ -204,7 +204,27 @@
           "items": {
             "type": "string"
           },
-          "description": "Dateitypen die bei Batch-Konvertierung berücksichtigt werden"
+          "description": "%config.fileTypes%"
+        },
+        "pxToRem.enableReverseHover": {
+          "type": "boolean",
+          "default": true,
+          "description": "%config.enableReverseHover%"
+        },
+        "pxToRem.useDynamicBaseFontSize": {
+          "type": "boolean",
+          "default": false,
+          "description": "%config.useDynamicBaseFontSize%"
+        },
+        "pxToRem.baseFontSizeFile": {
+          "type": "string",
+          "default": "src/styles/variables.scss",
+          "description": "%config.baseFontSizeFile%"
+        },
+        "pxToRem.baseFontSizeVariable": {
+          "type": "string",
+          "default": "$base-font-size",
+          "description": "%config.baseFontSizeVariable%"
         }
       }
     }

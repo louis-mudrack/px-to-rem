@@ -21,6 +21,10 @@ export interface ExtensionConfig {
     enableDiagnostics: boolean;
     enableCodeLens: boolean;
     diagnosticSeverity: string;
+    enableReverseHover: boolean;
+    useDynamicBaseFontSize: boolean;
+    baseFontSizeFile: string;
+    baseFontSizeVariable: string;
 }
 
 export interface ConversionStats {

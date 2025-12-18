@@ -2,9 +2,12 @@ import * as vscode from 'vscode';
 import { minimatch } from 'minimatch';
 import type { PxMatch, ExtensionConfig, ConversionStats } from './types';
 import { initializeLocale, t, tp } from './i18n';
+import { parseBaseFontSize, watchBaseFontSizeFile } from './baseFontSizeParser';
 
 let statusBarItem: vscode.StatusBarItem;
 let diagnosticCollection: vscode.DiagnosticCollection;
+let dynamicBaseFontSize: number | null = null;
+let baseFontSizeWatcher: vscode.FileSystemWatcher | null = null;
 
 function getConfig(): ExtensionConfig {
     const config = vscode.workspace.getConfiguration('pxToRem');
@@ -23,8 +26,19 @@ function getConfig(): ExtensionConfig {
         excludeProperties: config.get<string[]>('excludeProperties', []),
         enableDiagnostics: config.get<boolean>('enableDiagnostics', false),
         enableCodeLens: config.get<boolean>('enableCodeLens', true),
-        diagnosticSeverity: config.get<string>('diagnosticSeverity', 'information')
+        diagnosticSeverity: config.get<string>('diagnosticSeverity', 'information'),
+        enableReverseHover: config.get<boolean>('enableReverseHover', true),
+        useDynamicBaseFontSize: config.get<boolean>('useDynamicBaseFontSize', false),
+        baseFontSizeFile: config.get<string>('baseFontSizeFile', 'src/styles/variables.scss'),
+        baseFontSizeVariable: config.get<string>('baseFontSizeVariable', '$base-font-size')
     };
+}
+
+function getActualBaseFontSize(config: ExtensionConfig): number {
+    if (config.useDynamicBaseFontSize && dynamicBaseFontSize !== null) {
+        return dynamicBaseFontSize;
+    }
+    return config.baseFontSize;
 }
 
 function createExcludeRegexes(patterns: string[]): RegExp[] {
@@ -206,7 +220,7 @@ function convertPxValue(value: number, withPx: boolean, config: ExtensionConfig,
     }
     
     if (config.directConversion) {
-        const remValue = value / config.baseFontSize;
+        const remValue = value / getActualBaseFontSize(config);
         return `${remValue}rem`;
     }
     
@@ -393,7 +407,7 @@ function reverseConvert(): void {
             );
             
             const pxValue = config.directConversion 
-                ? Math.round(match.value * config.baseFontSize)
+                ? Math.round(match.value * getActualBaseFontSize(config))
                 : match.value;
             
             const replacement = `${pxValue}px`;
@@ -807,27 +821,68 @@ function updateDiagnostics(document: vscode.TextDocument): void {
 
 function providePxHover(document: vscode.TextDocument, position: vscode.Position): vscode.Hover | undefined {
     const config = getConfig();
-    const range = document.getWordRangeAtPosition(position, /(-?\d+(?:\.\d+)?)px/);
+    const actualBaseFontSize = getActualBaseFontSize(config);
     
-    if (!range) {
-        return undefined;
+    const pxRange = document.getWordRangeAtPosition(position, /(-?\d+(?:\.\d+)?)px/);
+    if (pxRange) {
+        const word = document.getText(pxRange);
+        const match = word.match(/(-?\d+(?:\.\d+)?)px/);
+        
+        if (match) {
+            const value = parseFloat(match[1]);
+            const preview = convertPxValue(value, false, config, false);
+            
+            const markdown = new vscode.MarkdownString();
+            markdown.appendMarkdown(`**${word}** → **${preview}**`);
+            markdown.appendMarkdown(t('hover.pressToConvert'));
+            
+            return new vscode.Hover(markdown, pxRange);
+        }
     }
     
-    const word = document.getText(range);
-    const match = word.match(/(-?\d+(?:\.\d+)?)px/);
-    
-    if (!match) {
-        return undefined;
+    if (config.enableReverseHover) {
+        const remFuncRange = document.getWordRangeAtPosition(position, /rem\((-?\d+(?:\.\d+)?)(px)?\)/);
+        if (remFuncRange) {
+            const word = document.getText(remFuncRange);
+            const match = word.match(/rem\((-?\d+(?:\.\d+)?)(px)?\)/);
+            
+            if (match) {
+                const value = parseFloat(match[1]);
+                const pxValue = match[2] ? value : Math.round(value * actualBaseFontSize);
+                const remValue = match[2] ? (value / actualBaseFontSize).toFixed(3) : value;
+                
+                const markdown = new vscode.MarkdownString();
+                if (match[2]) {
+                    markdown.appendMarkdown(`**${word}** → **${remValue}rem** (${pxValue}px)`);
+                } else {
+                    markdown.appendMarkdown(`**${word}** → **${pxValue}px**`);
+                }
+                
+                return new vscode.Hover(markdown, remFuncRange);
+            }
+        }
+        
+        const remRange = document.getWordRangeAtPosition(position, /(-?\d+(?:\.\d+)?)rem/);
+        if (remRange) {
+            const word = document.getText(remRange);
+            const match = word.match(/(-?\d+(?:\.\d+)?)rem/);
+            
+            if (match) {
+                const remValue = parseFloat(match[1]);
+                const pxValue = Math.round(remValue * actualBaseFontSize);
+                
+                const markdown = new vscode.MarkdownString();
+                markdown.appendMarkdown(`**${word}** → **${pxValue}px**`);
+                if (config.useDynamicBaseFontSize) {
+                    markdown.appendMarkdown(` *(base: ${actualBaseFontSize}px)*`);
+                }
+                
+                return new vscode.Hover(markdown, remRange);
+            }
+        }
     }
     
-    const value = parseFloat(match[1]);
-    const preview = convertPxValue(value, false, config, false);
-    
-    const markdown = new vscode.MarkdownString();
-    markdown.appendMarkdown(`**${word}** → **${preview}**`);
-    markdown.appendMarkdown(t('hover.pressToConvert'));
-    
-    return new vscode.Hover(markdown, range);
+    return undefined;
 }
 
 class PxToRemCodeLensProvider implements vscode.CodeLensProvider {
@@ -955,7 +1010,7 @@ class PxToRemCodeActionProvider implements vscode.CodeActionProvider {
                 );
                 actions.push(action1);
                 
-                const directRem = `${(value / config.baseFontSize)}rem`;
+                const directRem = `${(value / getActualBaseFontSize(config))}rem`;
                 const action2 = new vscode.CodeAction(
                     t('quickFix.convertTo', { value: directRem }),
                     vscode.CodeActionKind.QuickFix
@@ -997,6 +1052,41 @@ class PxToRemCodeActionProvider implements vscode.CodeActionProvider {
 
 export function activate(context: vscode.ExtensionContext): void {
     initializeLocale(context);
+    
+    const config = getConfig();
+    if (config.useDynamicBaseFontSize) {
+        const workspaceFolder = vscode.workspace.workspaceFolders?.[0];
+        if (workspaceFolder) {
+            parseBaseFontSize(
+                workspaceFolder,
+                config.baseFontSizeFile,
+                config.baseFontSizeVariable
+            ).then(value => {
+                if (value !== null) {
+                    dynamicBaseFontSize = value;
+                    vscode.window.showInformationMessage(
+                        `✅ Dynamic baseFontSize loaded: ${value}px from ${config.baseFontSizeVariable}`
+                    );
+                } else {
+                    vscode.window.showWarningMessage(
+                        `⚠️ Could not load dynamic baseFontSize. Using static value: ${config.baseFontSize}px`
+                    );
+                }
+            });
+            
+            baseFontSizeWatcher = watchBaseFontSizeFile(
+                workspaceFolder,
+                config.baseFontSizeFile,
+                (newValue) => {
+                    dynamicBaseFontSize = newValue;
+                    vscode.window.showInformationMessage(
+                        `✅ Dynamic baseFontSize updated: ${newValue}px`
+                    );
+                }
+            );
+            context.subscriptions.push(baseFontSizeWatcher);
+        }
+    }
     
     statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     context.subscriptions.push(statusBarItem);
