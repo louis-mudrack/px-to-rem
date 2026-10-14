@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "icon.png",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "publisher": "LouisMudrack",
   "license": "MIT",
   "repository": {
