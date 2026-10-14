@@ -2,7 +2,7 @@
   "name": "px-to-rem-function",
   "displayName": "%displayName%",
   "description": "%description%",
-  "icon": "logo.jpg",
+  "icon": "icon.png",
   "version": "2.0.0",
   "publisher": "LouisMudrack",
   "license": "MIT",

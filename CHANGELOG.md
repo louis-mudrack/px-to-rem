@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-A rewrite around a CSS-aware engine. The extension is now **PX to REM Toolkit**: same Marketplace id, many more ways to keep CSS scalable.
+A rewrite around a CSS-aware engine. The extension is now **PX to REM Toolkit**: same Marketplace id, a new icon, many more ways to keep CSS scalable.
 
 ### Breaking changes
 
