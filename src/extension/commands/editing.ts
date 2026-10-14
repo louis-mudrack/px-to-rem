@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { emBaseFor } from '../../core/context';
 import { cycleAt, planConversion, planReverse, pxAt, type LengthFilter } from '../../core/convert';
 import { formatNumber } from '../../core/format';
 import type { MessageId } from '../../core/messages';
@@ -184,12 +185,16 @@ async function step(services: Services, direction: 1 | -1): Promise<void> {
         const px = sign * target;
         const current = doc.text.slice(found.start, found.end);
         let newText: string;
-        if (/px$/i.test(current)) {
+        if (length.implicitPx) {
+            // React number: stays a number of px.
+            newText = formatNumber(px, { precision: 2, leadingZero: true });
+        } else if (/px$/i.test(current)) {
             newText = `${formatNumber(px, { precision: 2, leadingZero: options.leadingZero })}px`;
         } else if (/rem$/i.test(current)) {
             newText = `${formatNumber(px / ctx.rootFontSize, style)}rem`;
         } else if (/em$/i.test(current)) {
-            newText = `${formatNumber((px * length.value) / found.px, style)}em`;
+            const emBase = found.px !== 0 && length.value !== 0 ? found.px / length.value : emBaseFor(doc, length, ctx, options.functionName).px;
+            newText = `${formatNumber(px / emBase, style)}em`;
         } else if (current.toLowerCase().startsWith(options.functionName.toLowerCase() + '(')) {
             newText = current.replace(/\(\s*-?[\d.]+/, `(${formatNumber(px, { precision: 2, leadingZero: options.leadingZero })}`);
         } else {

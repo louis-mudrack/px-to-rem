@@ -21,7 +21,8 @@ export const TAILWIND_UTILITIES: Readonly<Record<string, string>> = {
     basis: 'flex-basis', 'grid-cols': 'grid-template-columns', 'grid-rows': 'grid-template-rows', 'auto-cols': 'grid-auto-columns', 'auto-rows': 'grid-auto-rows', columns: 'column-width',
     'scroll-m': 'scroll-margin', 'scroll-mx': 'scroll-margin', 'scroll-my': 'scroll-margin', 'scroll-mt': 'scroll-margin-top', 'scroll-mr': 'scroll-margin-right', 'scroll-mb': 'scroll-margin-bottom', 'scroll-ml': 'scroll-margin-left',
     'scroll-p': 'scroll-padding', 'scroll-px': 'scroll-padding', 'scroll-py': 'scroll-padding', 'scroll-pt': 'scroll-padding-top', 'scroll-pr': 'scroll-padding-right', 'scroll-pb': 'scroll-padding-bottom', 'scroll-pl': 'scroll-padding-left',
-    decoration: 'text-decoration-thickness', 'underline-offset': 'text-underline-offset', 'border-spacing': 'border-spacing', 'stroke': 'stroke-width',
+    decoration: 'text-decoration-thickness', 'underline-offset': 'text-underline-offset', stroke: 'stroke-width',
+    'border-spacing': 'border-spacing', 'border-spacing-x': 'border-spacing', 'border-spacing-y': 'border-spacing',
 };
 
 /** Spacing-scale utilities: value N means N × 0.25rem. */
@@ -31,7 +32,7 @@ const SPACING_UTILITIES = new Set([
     'gap', 'gap-x', 'gap-y', 'space-x', 'space-y',
     'w', 'h', 'size', 'min-w', 'min-h', 'max-h',
     'inset', 'inset-x', 'inset-y', 'top', 'right', 'bottom', 'left', 'start', 'end',
-    'translate-x', 'translate-y', 'basis', 'indent',
+    'translate-x', 'translate-y', 'basis', 'indent', 'border-spacing', 'border-spacing-x', 'border-spacing-y',
     'scroll-m', 'scroll-mx', 'scroll-my', 'scroll-mt', 'scroll-mr', 'scroll-mb', 'scroll-ml',
     'scroll-p', 'scroll-px', 'scroll-py', 'scroll-pt', 'scroll-pr', 'scroll-pb', 'scroll-pl',
 ]);
@@ -119,7 +120,7 @@ export function canonicalTailwindClass(utility: string, px: number, negative: bo
         return undefined;
     }
 
-    if (utility.startsWith('border') && !negative) {
+    if (utility.startsWith('border') && !utility.startsWith('border-spacing') && !negative) {
         for (const [key, value] of Object.entries(BORDER_WIDTHS)) {
             if (value === abs) {
                 return key ? `${utility}-${key}` : utility;

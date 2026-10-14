@@ -240,3 +240,35 @@ describe('reverse, rebase and cycling', () => {
         expect(seen).toEqual(['1rem', '0.8em', '1.1111vw', '16px']);
     });
 });
+
+describe('review regressions', () => {
+    it('keeps a unit on zero inside math functions and variables', () => {
+        expect(convert('a { width: calc(100% - 0px); height: max(0px, 10vw); margin: 0px; }', 'css', simple)).toBe(
+            'a { width: calc(100% - 0rem); height: max(0rem, 10vw); margin: 0; }',
+        );
+        expect(convert('--gap: 0px;', 'css', simple)).toBe('--gap: 0rem;');
+    });
+
+    it('quotes alternatives for React numbers', () => {
+        const { options, ctx } = setup({ 'js.unitlessNumbers': true });
+        const jsx = 'const s = { fontSize: 16 };';
+        const doc = parseDocument(jsx, 'javascriptreact', { jsUnitlessNumbers: true });
+        const alt = alternativesAt(doc, jsx.indexOf('16') + 1, options, ctx)!;
+        expect(alt.options.slice(0, 2)).toEqual(["'16px'", "'1rem'"]);
+        expect(alt.options.every(o => o.startsWith("'") && o.endsWith("'"))).toBe(true);
+        expect(cycleAt(doc, jsx.indexOf('16') + 1, options, ctx)?.newText).toBe("'1rem'");
+    });
+
+    it('offers media-query alternatives relative to the browser default', () => {
+        const { options, ctx } = setup({}, { rootFontSize: 10 });
+        const css = '@media (min-width: 768px) {}';
+        const doc = parseDocument(css, 'css');
+        expect(alternativesAt(doc, css.indexOf('768') + 1, options, ctx)?.options).toEqual(['768px', '48em', '48rem']);
+    });
+
+    it('maps Tailwind border-spacing on the spacing scale', () => {
+        // border-[2px] → border-2 is the identical 2px border width, just the canonical class.
+        const html = '<table class="border-spacing-[8px] border-[2px]"></table>';
+        expect(convert(html, 'html', {}, { tailwind: DEFAULT_TAILWIND })).toBe('<table class="border-spacing-2 border-2"></table>');
+    });
+});

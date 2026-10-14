@@ -137,3 +137,28 @@ describe('px-to-rem CLI', () => {
         expect((await cli(process.cwd(), 'check', '--set', 'notAnOption=1')).code).toBe(2);
     });
 });
+
+describe('review regressions', () => {
+    it('applies root .gitignore patterns when run from a subdirectory', async () => {
+        const dir = project({
+            '.gitignore': '/packages/web/legacy\n',
+            'packages/web/legacy/a.css': '.a { margin: 16px; }\n',
+            'packages/web/src/b.css': '.b { margin: 16px; }\n',
+        });
+        execFileSync('git', ['init', '-q'], { cwd: dir });
+        await cli(join(dir, 'packages/web'), 'fix');
+        expect(readFileSync(join(dir, 'packages/web/legacy/a.css'), 'utf8')).toBe('.a { margin: 16px; }\n');
+        expect(readFileSync(join(dir, 'packages/web/src/b.css'), 'utf8')).toBe('.b { margin: 1rem; }\n');
+    });
+
+    it('--changed sees untracked files with special characters', async () => {
+        const dir = project({ 'a.css': '.a { padding: 0; }\n' });
+        const git = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
+        git('init', '-q');
+        git('-c', 'user.email=t@example.com', '-c', 'user.name=t', 'add', '-A');
+        git('-c', 'user.email=t@example.com', '-c', 'user.name=t', 'commit', '-qm', 'init');
+        writeFileSync(join(dir, 'café.css'), '.c { top: 4px; }\n');
+        const result = await cli(dir, 'check', '--changed', '--reporter', 'json');
+        expect(JSON.parse(result.out).map((f: { file: string }) => f.file)).toEqual(['café.css']);
+    });
+});

@@ -59,7 +59,11 @@ export function loadConfig(cwd: string, explicit?: string): LoadedConfig {
             }
         }
         const parent = dirname(dir);
-        if (parent === dir || existsSync(join(dir, '.git'))) {
+        if (existsSync(join(dir, '.git'))) {
+            // No config file: the repository root anchors .gitignore and project detection.
+            return { root: dir };
+        }
+        if (parent === dir) {
             return { root: resolve(cwd) };
         }
         dir = parent;
@@ -83,13 +87,23 @@ function readGitignore(root: string): string[] {
     return existsSync(path) ? gitignoreToGlobs(readFileSync(path, 'utf8')) : [];
 }
 
-/** Resolves file patterns (default: every supported file) honouring excludes and .gitignore. */
+/**
+ * Resolves file patterns (default: every supported file under `cwd`) honouring
+ * excludes and .gitignore. Globbing runs from the config root so that root-
+ * relative ignore patterns apply even when the CLI runs in a subdirectory.
+ */
 export async function findFiles(root: string, patterns: string[], options: Options, cwd: string): Promise<string[]> {
     const ignore = [...ALWAYS_EXCLUDED_DIRS.map(d => `**/${d}/**`), ...options.excludeFiles, ...(options.respectGitignore ? readGitignore(root) : [])];
-    // Explicit patterns may name any supported file; the default covers pxToRem.fileTypes.
-    const effective = patterns.length ? patterns : [`**/*.{${options.fileTypes.join(',')}}`];
-    const files = await glob(effective, { cwd, ignore, absolute: true, dot: false, onlyFiles: true });
-    return files.filter(f => languageForFileName(f)).sort();
+    const fromCwd = patterns.length ? patterns : [`**/*.{${options.fileTypes.join(',')}}`];
+    const rooted = fromCwd.map(pattern => {
+        const negated = pattern.startsWith('!');
+        const body = negated ? pattern.slice(1) : pattern;
+        const relativeToRoot = toPosix(relative(root, resolve(cwd, body))) || '.';
+        return (negated ? '!' : '') + relativeToRoot;
+    });
+    const files = await glob(rooted, { cwd: root, ignore, absolute: true, dot: false, onlyFiles: true });
+    // Normalise separators so lookups (e.g. --changed) match on every platform.
+    return [...new Set(files.map(f => resolve(f)))].filter(f => languageForFileName(f)).sort();
 }
 
 export interface ProjectFacts {
@@ -222,13 +236,14 @@ export async function buildProject(loaded: LoadedConfig, options: Options, expli
 export function changedLines(root: string, base = 'HEAD'): Map<string, Set<number> | 'all'> {
     const out = new Map<string, Set<number> | 'all'>();
     const gitRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: root, encoding: 'utf8' }).trim();
-    const diff = execFileSync('git', ['diff', '-U0', '--no-color', '--no-ext-diff', base], { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+    const diff = execFileSync('git', ['-c', 'core.quotePath=false', 'diff', '-U0', '--no-color', '--no-ext-diff', base], { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
     for (const [path, fileDiff] of splitDiffByFile(diff)) {
         out.set(resolve(gitRoot, path), changedLinesFromDiff(fileDiff));
     }
-    const untracked = execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: gitRoot, encoding: 'utf8' });
-    for (const line of untracked.split('\n').filter(Boolean)) {
-        out.set(resolve(gitRoot, line), 'all');
+    // -z: raw paths, no C-quoting of special characters.
+    const untracked = execFileSync('git', ['ls-files', '-z', '--others', '--exclude-standard'], { cwd: gitRoot, encoding: 'utf8' });
+    for (const path of untracked.split('\0').filter(Boolean)) {
+        out.set(resolve(gitRoot, path), 'all');
     }
     return out;
 }

@@ -35,7 +35,7 @@ function mergesFor(state: DocState): BreakpointMerge[] {
 /** Comment that disables conversion on the next line, in the syntax of the surrounding code. */
 export function ignoreCommentFor(length: LengthNode, hostKind: string | undefined, lineText: string): string {
     const kind = length.region.kind;
-    if (hostKind === 'markup' && (kind === 'style-attribute' || kind === 'tailwind')) {
+    if (hostKind === 'markup' && length.region.inAttribute) {
         return '<!-- px-to-rem-disable-next-line -->';
     }
     if (hostKind === 'script' && (kind === 'js-object' || kind === 'tailwind')) {

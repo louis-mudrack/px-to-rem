@@ -28,12 +28,10 @@ async function readText(uri: vscode.Uri): Promise<string | undefined> {
 
 /** Files of the configured types under `base` (or the workspace), minus ignored ones. */
 export async function findWorkspaceFiles(services: Services, base?: vscode.Uri, extensions?: string[]): Promise<vscode.Uri[]> {
-    const folders = vscode.workspace.workspaceFolders ?? [];
+    const baseFolder = base ? vscode.workspace.getWorkspaceFolder(base) : undefined;
+    const folders = base ? (baseFolder ? [baseFolder] : []) : (vscode.workspace.workspaceFolders ?? []);
     const out: vscode.Uri[] = [];
     for (const folder of folders) {
-        if (base && !base.toString().startsWith(folder.uri.toString())) {
-            continue;
-        }
         const options = services.config.optionsFor(folder.uri);
         const exts = extensions ?? options.fileTypes;
         if (!exts.length) {

@@ -247,7 +247,12 @@ export function alternativesAt(doc: ParsedDocument, offset: number, options: Opt
     const style = { precision: options.precision, leadingZero: options.leadingZero };
     const current = doc.text.slice(found.start, found.end);
     const list: string[] = [`${formatNumber(px, pxStyle(options))}px`];
-    if (length) {
+    const inMedia = length?.context === 'media' || length?.context === 'container';
+    if (length && inMedia) {
+        // Media queries resolve rem and em against the browser default, not the root font size.
+        list.push(`${formatNumber(px / options.mediaQueryBase, style)}em`);
+        list.push(`${formatNumber(px / options.mediaQueryBase, style)}rem`);
+    } else if (length) {
         const template = resolveTemplate(options, ctx, length);
         const bases = unitBases(doc, length, options, ctx);
         list.push(renderTemplate(template, templateValues(px, bases), style));
@@ -265,7 +270,11 @@ export function alternativesAt(doc: ParsedDocument, offset: number, options: Opt
     } else {
         list.push(`${formatNumber(px / ctx.rootFontSize, style)}rem`);
     }
-    const unique = [...new Set(list)];
+    let unique = [...new Set(list)];
+    if (length?.implicitPx) {
+        // `fontSize: 16` is a JS number: alternatives must be strings.
+        unique = unique.map(text => `'${text}'`);
+    }
     return { start: found.start, end: found.end, current, options: unique };
 }
 
@@ -276,6 +285,10 @@ export function cycleAt(doc: ParsedDocument, offset: number, options: Options, c
         return undefined;
     }
     let index = alt.options.indexOf(alt.current);
+    if (index < 0 && /^-?[\d.]+$/.test(alt.current)) {
+        // A bare React number is px.
+        index = 0;
+    }
     if (index < 0) {
         // Not a canonical spelling (e.g. `1.50rem`): find the entry with the same unit.
         const unit = /[a-z%]+$/i.exec(alt.current)?.[0] ?? '';

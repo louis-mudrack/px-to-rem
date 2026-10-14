@@ -124,7 +124,8 @@ export class StatsService implements vscode.Disposable {
             return undefined;
         }
         const { doc, options, ctx } = this.services.engine.parseText(text, languageId, uri);
-        const stats = analyzeDocument(doc, vscode.workspace.asRelativePath(uri, false), options, ctx);
+        // Multi-root paths carry the folder name so views can resolve them (resolveRelative).
+        const stats = analyzeDocument(doc, vscode.workspace.asRelativePath(uri, true), options, ctx);
         this.cache.set(key, { stamp, stats });
         return stats;
     }

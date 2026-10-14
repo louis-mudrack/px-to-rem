@@ -20,6 +20,8 @@ export interface RegionSpec extends Span {
     implicitPx?: boolean;
     /** Tailwind class the value belongs to. */
     tailwind?: TailwindClass;
+    /** Inside an HTML attribute (style="", class="", :style="…"), where only HTML comments work. */
+    inAttribute?: boolean;
 }
 
 export interface ExtractOptions {
@@ -58,7 +60,8 @@ export function extractRegions(text: string, languageId: string, options: Extrac
     return result;
 }
 
-function scanScript(text: string, start: number, end: number, options: ExtractOptions, out: ExtractResult): void {
+function scanScript(text: string, start: number, end: number, options: ExtractOptions, out: ExtractResult, inAttribute = false): void {
+    const first = out.regions.length;
     const js = scanJs(text, start, end);
     out.comments.push(...js.comments);
 
@@ -109,6 +112,11 @@ function scanScript(text: string, start: number, end: number, options: ExtractOp
                 const numStart = colonAt + m[0].indexOf(m[1]);
                 out.regions.push({ kind: 'js-object', start: numStart, end: numStart + m[1].length, syntax: 'css', property, implicitPx: true });
             }
+        }
+    }
+    if (inAttribute) {
+        for (const region of out.regions.slice(first)) {
+            region.inAttribute = true;
         }
     }
 }
@@ -204,17 +212,21 @@ function handleAttribute(text: string, attr: Attribute, options: ExtractOptions,
     const bare = name.replace(/^(v-bind)?:/, '');
     if (bare === 'style') {
         if (isJs) {
-            scanScript(text, attr.valueStart, attr.valueEnd, options, out);
+            scanScript(text, attr.valueStart, attr.valueEnd, options, out, true);
         } else {
-            out.regions.push({ kind: 'style-attribute', start: attr.valueStart, end: attr.valueEnd, syntax: 'css', declarationList: true });
+            out.regions.push({ kind: 'style-attribute', start: attr.valueStart, end: attr.valueEnd, syntax: 'css', declarationList: true, inAttribute: true });
         }
         return;
     }
     if (options.tailwind && (bare === 'class' || bare === 'classname' || bare === 'class:list')) {
         if (isJs) {
-            scanScript(text, attr.valueStart, attr.valueEnd, options, out);
+            scanScript(text, attr.valueStart, attr.valueEnd, options, out, true);
         } else {
+            const first = out.regions.length;
             addTailwind(text, attr.valueStart, attr.valueEnd, out);
+            for (const region of out.regions.slice(first)) {
+                region.inAttribute = true;
+            }
         }
     }
 }

@@ -75,7 +75,9 @@ async function makeFluid(services: Services, uri?: vscode.Uri, start?: number, e
         precision: options.precision,
         leadingZero: options.leadingZero,
     });
-    await editor.edit(b => b.replace(toRange(editor.document, spanStart, spanEnd), clamp));
+    // A React number (`fontSize: 16`) must become a string.
+    const replacement = found.length?.implicitPx ? `'${clamp}'` : clamp;
+    await editor.edit(b => b.replace(toRange(editor.document, spanStart, spanEnd), replacement));
     if (Math.max(minPx, maxPx) > 2.5 * Math.min(minPx, maxPx) && found.length?.decl?.property === 'font-size') {
         void vscode.window.showWarningMessage(
             vscode.l10n.t('The large size is more than 2.5× the small one, so text may not reach 200% with browser zoom (WCAG 1.4.4).'),

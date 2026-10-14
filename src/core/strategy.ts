@@ -46,6 +46,8 @@ export type Target =
 
 export type Decision = { convert: true; target: Target; reason: Reason } | { convert: false; reason: Reason };
 
+const MATH_FUNCTIONS = new Set(['calc', 'min', 'max', 'clamp', 'round', 'mod', 'rem', 'abs', 'sign', 'hypot', 'pow', 'sqrt', 'sin', 'cos', 'tan', 'exp', 'log']);
+
 /** Functions whose arguments are already handled by a converter. */
 const CONVERTER_FUNCTIONS = new Set(['rem', 'torem', 'to-rem', 'pxtorem', 'px-to-rem', 'px2rem', 'rpx', 'em', 'toem', 'to-em', 'pxtoem', 'vw', 'tovw', 'pxtovw']);
 
@@ -193,7 +195,9 @@ export function decide(doc: ParsedDocument, length: LengthNode, options: Options
         return { convert: false, reason: 'excluded-property' };
     }
 
-    if (length.value === 0 && options.preserveZero) {
+    // A unitless 0 is invalid inside calc()/min()/max()/clamp() and in variables that may end up there.
+    const zeroAllowed = length.context === 'declaration' && !length.functions.some(f => MATH_FUNCTIONS.has(f));
+    if (length.value === 0 && options.preserveZero && zeroAllowed) {
         return { convert: true, target: { kind: 'zero' }, reason: 'zero' };
     }
 

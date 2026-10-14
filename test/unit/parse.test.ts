@@ -261,3 +261,15 @@ describe('directives', () => {
         ).toEqual([true]);
     });
 });
+
+describe('attribute regions', () => {
+    it('marks regions that live in HTML attributes', () => {
+        const vue = `<div :style="{ width: '16px' }" style="top: 2px"></div>\n<script>const s = { height: '4px' };</script>`;
+        const doc = parseDocument(vue, 'vue');
+        expect(doc.lengths.map(l => [vue.slice(l.start, l.end), !!l.region.inAttribute])).toEqual([
+            ['16px', true],
+            ['2px', true],
+            ['4px', false],
+        ]);
+    });
+});
