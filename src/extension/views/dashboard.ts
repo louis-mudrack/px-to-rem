@@ -19,7 +19,7 @@ const FORMATS: { id: TokenFileFormat; label: string; language: string }[] = [
 /** UI strings for the webview, localized on the extension side. */
 function strings(): Record<string, string> {
     const keys = [
-        'Show chart', 'Show table', 'Value', 'Uses', 'Files', 'On the 4px grid', 'yes', 'no', 'Off the 4px grid', '{0} most used of {1} values',
+        'Show chart', 'Show table', 'Value', 'Uses', 'Files', 'On the 4px grid', 'yes', 'no', 'Off the 4px grid', 'On the type scale', 'Off the type scale', '{0} most used of {1} values',
         '{0} distinct values', 'Distribution of {0} values', 'uses in {0} files', 'Migration progress', 'Share of lengths that scale with the user font size',
         'Date', 'Scalable', 'px left', 'scalable', 'Scanning workspace…', 'Value audit', 'Refresh', 'Convert workspace…',
         'of lengths scale with the user font size', 'in {0} files', 'Kept on purpose', 'borders, hairlines, opt-outs', 'Scalable values',
@@ -50,7 +50,7 @@ function nonce(): string {
     return out;
 }
 
-const CSS = `
+export const DASHBOARD_CSS = `
 :root {
   --accent: #2a78d6; --muted-mark: #898781; --track: #cde2fb;
   --surface: var(--vscode-editor-background); --ink: var(--vscode-foreground); --ink-2: var(--vscode-descriptionForeground);
@@ -91,6 +91,7 @@ select { font: inherit; color: var(--vscode-dropdown-foreground); background: va
 .card { margin-bottom: 16px; min-width: 0; }
 .grid .card { margin-bottom: 0; }
 .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.card-head .link { white-space: nowrap; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; color: var(--ink-2); margin-bottom: 8px; }
 .legend-item { display: inline-flex; align-items: center; gap: 6px; }
 .swatch { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
@@ -160,7 +161,7 @@ class Dashboard {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'nonce-${n}'; script-src 'nonce-${n}' ${panel.webview.cspSource}; img-src ${panel.webview.cspSource} data:;">
-<style nonce="${n}">${CSS}</style>
+<style nonce="${n}">${DASHBOARD_CSS}</style>
 <title>PX to REM</title>
 </head>
 <body><div id="app"></div><script nonce="${n}" src="${script}"></script></body>

@@ -237,32 +237,63 @@ function columnPath(x: number, y: number, w: number, h: number): string {
 
 // Charts ---------------------------------------------------------------------
 
-function histogram(category: string, bins: Histogram[]): HTMLElement {
+/**
+ * How a category's chart emphasises values: spacing-like values against the
+ * 4px grid, font sizes against the detected type scale, everything else as a
+ * single series.
+ */
+function emphasisFor(category: string, report: Report): { highlight: (v: number) => boolean; on: string; off: string } | undefined {
+    if (category === 'spacing' || category === 'size' || category === 'radius') {
+        const onGrid = (v: number) =>
+            v >= 999 || (v < 8 ? Math.abs(v * 2 - Math.round(v * 2)) < 1e-6 && Math.round(v) % 2 === 0 : Math.abs(v / 4 - Math.round(v / 4)) < 1e-6);
+        return { highlight: v => !onGrid(v), on: t('On the 4px grid'), off: t('Off the 4px grid') };
+    }
+    if (category === 'font-size' && report.typeScale) {
+        const misfits = new Set(report.typeScale.misfits.map(v => Math.round(v * 4)));
+        return { highlight: v => misfits.has(Math.round(v * 4)), on: t('On the type scale'), off: t('Off the type scale') };
+    }
+    return undefined;
+}
+
+function histogram(category: string, bins: Histogram[], report: Report): HTMLElement {
     const shown = bins.length > 60 ? [...bins].sort((a, b) => b.count - a.count).slice(0, 60).sort((a, b) => a.value - b.value) : bins;
-    const onGrid = (v: number) => (v < 8 ? Math.abs(v * 2 - Math.round(v * 2)) < 1e-6 && Math.round(v) % 2 === 0 : Math.abs(v / 4 - Math.round(v / 4)) < 1e-6);
+    const emphasis = emphasisFor(category, report);
     const id = `hist-${category}`;
     const subtitle = bins.length > shown.length ? t('{0} most used of {1} values', shown.length, bins.length) : t('{0} distinct values', bins.length);
+    const headers = [t('Value'), t('Uses'), t('Files')];
+    if (emphasis) {
+        headers.push(emphasis.off);
+    }
     const { root, body } = card(id, t(`category.${category}`), subtitle, () =>
         table(
-            [t('Value'), t('Uses'), t('Files'), t('On the 4px grid')],
-            bins.map(b => [`${fmt(b.value)}px`, b.count, b.files, onGrid(b.value) ? t('yes') : t('no')]),
+            headers,
+            bins.map(b => {
+                const row: (string | number)[] = [`${fmt(b.value)}px`, b.count, b.files];
+                if (emphasis) {
+                    row.push(emphasis.highlight(b.value) ? t('yes') : t('no'));
+                }
+                return row;
+            }),
             [true, true, true, false],
         ),
     );
     if (tableViews.has(id)) {
         return root;
     }
-    const legend = el('div', 'legend');
-    for (const [cls, label] of [
-        ['swatch accent', t('Off the 4px grid')],
-        ['swatch muted', t('On the 4px grid')],
-    ]) {
-        const item = el('span', 'legend-item');
-        item.appendChild(el('span', cls));
-        item.appendChild(document.createTextNode(label));
-        legend.appendChild(item);
+    // Two classes need a legend; a single series is named by the card title.
+    if (emphasis) {
+        const legend = el('div', 'legend');
+        for (const [cls, label] of [
+            ['swatch accent', emphasis.off],
+            ['swatch muted', emphasis.on],
+        ]) {
+            const item = el('span', 'legend-item');
+            item.appendChild(el('span', cls));
+            item.appendChild(document.createTextNode(label));
+            legend.appendChild(item);
+        }
+        body.appendChild(legend);
     }
-    body.appendChild(legend);
 
     const width = chartWidth();
     const height = 180;
@@ -288,13 +319,14 @@ function histogram(category: string, bins: Histogram[]): HTMLElement {
         const h = Math.max(1, (bin.count / max) * plotH);
         const y = pad.top + plotH - h;
         const group = svg('g', { class: 'mark' });
-        group.appendChild(svg('path', { d: columnPath(x, y, barW, h), class: onGrid(bin.value) ? 'fill-muted' : 'fill-accent' }));
+        const highlighted = emphasis ? emphasis.highlight(bin.value) : true;
+        group.appendChild(svg('path', { d: columnPath(x, y, barW, h), class: highlighted ? 'fill-accent' : 'fill-muted' }));
         const hit = svg('rect', { x: pad.left + i * slot, y: pad.top, width: Math.max(slot, 1), height: plotH, class: 'hit' });
         group.appendChild(hit);
         interactive(hit, `${fmt(bin.value)}px: ${bin.count}`, () => [
             { strong: `${fmt(bin.value)}px`, text: '' },
             { strong: String(bin.count), text: t('uses in {0} files', bin.files) },
-            { strong: '', text: onGrid(bin.value) ? t('On the 4px grid') : t('Off the 4px grid') },
+            ...(emphasis ? [{ strong: '', text: emphasis.highlight(bin.value) ? emphasis.off : emphasis.on }] : []),
         ]);
         chart.appendChild(group);
         if (i === 0 || i === shown.length - 1 || top3.has(bin.value)) {
@@ -494,7 +526,7 @@ function render(): void {
     for (const category of order) {
         const bins = report.histograms[category];
         if (bins && bins.length) {
-            multiples.appendChild(histogram(category, bins));
+            multiples.appendChild(histogram(category, bins, report));
         }
     }
     if (multiples.childElementCount) {
