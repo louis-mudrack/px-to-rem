@@ -188,7 +188,9 @@ export function decide(doc: ParsedDocument, length: LengthNode, options: Options
     // Tailwind scale classes and exact tokens win over unit conversion when enabled.
     const tw = length.region.tailwind;
     if (tw && ctx.tailwind && options.tailwind.preferScale && !tw.arbitraryProperty && singleLength(doc, length)) {
-        const className = canonicalTailwindClass(tw.utility, length.value, tw.negative || length.value < 0, ctx.tailwind);
+        // Tailwind scales are rem based; TailwindConfig values are expressed at a 16px root.
+        const px16 = (length.value * 16) / ctx.rootFontSize;
+        const className = canonicalTailwindClass(tw.utility, px16, tw.negative || length.value < 0, ctx.tailwind);
         if (className) {
             return { convert: true, target: { kind: 'tailwind-class', className }, reason: 'tailwind-scale' };
         }

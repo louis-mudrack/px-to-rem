@@ -48,13 +48,17 @@ const RADIUS_V4: Readonly<Record<string, number>> = { none: 0, xs: 2, sm: 4, md:
 
 const BORDER_WIDTHS: Readonly<Record<string, number>> = { '0': 0, '': 1, '2': 2, '4': 4, '8': 8 };
 
+/**
+ * Tailwind theme facts. All px values are expressed at a 16px root (Tailwind
+ * scales are rem based, so `p-4` is 1rem whatever the root font size is).
+ */
 export interface TailwindConfig {
     version: 3 | 4;
-    /** Size of one spacing step in px (default 4 = 0.25rem at 16px). */
+    /** Size of one spacing step in px at a 16px root (default 4 = 0.25rem). */
     spacingPx: number;
-    /** Extra named font sizes from the theme, in px. */
+    /** Extra named font sizes from the theme, in px at a 16px root. */
     fontSizes?: Record<string, number>;
-    /** Extra named spacing values from the theme, in px. */
+    /** Extra named spacing values from the theme, in px at a 16px root. */
     spacing?: Record<string, number>;
 }
 
