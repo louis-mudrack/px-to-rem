@@ -3,7 +3,7 @@
   "displayName": "%displayName%",
   "description": "%description%",
   "icon": "logo.jpg",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "publisher": "LouisMudrack",
   "license": "MIT",
   "repository": {
@@ -15,239 +15,65 @@
     "url": "https://github.com/louis-mudrack/px-to-rem/issues"
   },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.97.0"
   },
   "categories": [
     "Formatters",
+    "Linters",
+    "Programming Languages",
     "Other"
   ],
   "keywords": [
     "px",
     "rem",
+    "em",
     "css",
     "scss",
     "sass",
+    "less",
+    "stylus",
+    "tailwind",
+    "styled-components",
     "converter",
-    "responsive",
-    "accessibility"
+    "clamp",
+    "fluid typography",
+    "design tokens",
+    "accessibility",
+    "wcag"
   ],
-  "activationEvents": [
-    "onCommand:px-to-rem.convert",
-    "onCommand:px-to-rem.convertWithPx",
-    "onCommand:px-to-rem.convertWorkspace",
-    "onCommand:px-to-rem.switchProfile",
-    "onCommand:px-to-rem.convertSelection",
-    "onCommand:px-to-rem.reverseConvert",
-    "onCommand:px-to-rem.exportSettings",
-    "onCommand:px-to-rem.importSettings",
-    "onStartupFinished"
-  ],
-  "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "px-to-rem.convert",
-        "title": "%command.convert%"
-      },
-      {
-        "command": "px-to-rem.convertWithPx",
-        "title": "%command.convertWithPx%"
-      },
-      {
-        "command": "px-to-rem.convertWorkspace",
-        "title": "%command.convertWorkspace%"
-      },
-      {
-        "command": "px-to-rem.switchProfile",
-        "title": "%command.switchProfile%"
-      },
-      {
-        "command": "px-to-rem.convertSelection",
-        "title": "%command.convertSelection%"
-      },
-      {
-        "command": "px-to-rem.reverseConvert",
-        "title": "%command.reverseConvert%"
-      },
-      {
-        "command": "px-to-rem.exportSettings",
-        "title": "%command.exportSettings%"
-      },
-      {
-        "command": "px-to-rem.importSettings",
-        "title": "%command.importSettings%"
-      },
-      {
-        "command": "px-to-rem.convertFileType",
-        "title": "%command.convertFileType%"
-      }
-    ],
-    "keybindings": [
-      {
-        "command": "px-to-rem.convert",
-        "key": "ctrl+k",
-        "mac": "cmd+k",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "px-to-rem.convertWithPx",
-        "key": "ctrl+oem_7",
-        "mac": "cmd+oem_7",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "px-to-rem.convertSelection",
-        "key": "ctrl+shift+k",
-        "mac": "cmd+shift+k",
-        "when": "editorTextFocus && editorHasSelection"
-      }
-    ],
-    "configuration": {
-      "title": "PX to REM Converter",
-      "properties": {
-        "pxToRem.directConversion": {
-          "type": "boolean",
-          "default": false,
-          "description": "%config.directConversion%"
-        },
-        "pxToRem.baseFontSize": {
-          "type": "number",
-          "default": 16,
-          "description": "%config.baseFontSize%"
-        },
-        "pxToRem.minValue": {
-          "type": "number",
-          "default": 0,
-          "description": "%config.minValue%"
-        },
-        "pxToRem.maxValue": {
-          "type": "number",
-          "default": 9999,
-          "description": "%config.maxValue%"
-        },
-        "pxToRem.includeProperties": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "description": "%config.includeProperties%"
-        },
-        "pxToRem.excludeProperties": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "description": "%config.excludeProperties%"
-        },
-        "pxToRem.keepPxInRem": {
-          "type": "boolean",
-          "default": false,
-          "description": "%config.keepPxInRem%"
-        },
-        "pxToRem.preserveZero": {
-          "type": "boolean",
-          "default": false,
-          "description": "%config.preserveZero%"
-        },
-        "pxToRem.scssInterpolation": {
-          "type": "boolean",
-          "default": false,
-          "description": "%config.scssInterpolation%"
-        },
-        "pxToRem.enableDiagnostics": {
-          "type": "boolean",
-          "default": false,
-          "description": "%config.enableDiagnostics%"
-        },
-        "pxToRem.enableCodeLens": {
-          "type": "boolean",
-          "default": true,
-          "description": "%config.enableCodeLens%"
-        },
-        "pxToRem.diagnosticSeverity": {
-          "type": "string",
-          "enum": [
-            "error",
-            "warning",
-            "information",
-            "hint"
-          ],
-          "default": "information",
-          "description": "%config.diagnosticSeverity%"
-        },
-        "pxToRem.excludePatterns": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "description": "%config.excludePatterns%"
-        },
-        "pxToRem.excludeFiles": {
-          "type": "array",
-          "default": [],
-          "items": {
-            "type": "string"
-          },
-          "description": "%config.excludeFiles%"
-        },
-        "pxToRem.fileTypes": {
-          "type": "array",
-          "default": [
-            "css",
-            "scss",
-            "sass",
-            "less"
-          ],
-          "items": {
-            "type": "string"
-          },
-          "description": "%config.fileTypes%"
-        },
-        "pxToRem.enableInlayHints": {
-          "type": "boolean",
-          "default": true,
-          "description": "%config.enableInlayHints%"
-        },
-        "pxToRem.useDynamicBaseFontSize": {
-          "type": "boolean",
-          "default": false,
-          "description": "%config.useDynamicBaseFontSize%"
-        },
-        "pxToRem.baseFontSizeFile": {
-          "type": "string",
-          "default": "src/styles/variables.scss",
-          "description": "%config.baseFontSizeFile%"
-        },
-        "pxToRem.baseFontSizeVariable": {
-          "type": "string",
-          "default": "$base-font-size",
-          "description": "%config.baseFontSizeVariable%"
-        }
-      }
-    }
-  },
+  "main": "./dist/extension.js",
+  "browser": "./dist/web/extension.js",
+  "l10n": "./l10n",
   "scripts": {
-    "vscode:prepublish": "npm run compile && npm run copy-locales",
-    "compile": "tsc -p ./",
-    "copy-locales": "node -e \"const fs = require('fs'); const path = require('path'); const src = path.join('src', 'locales'); const dest = path.join('out', 'locales'); if (!fs.existsSync(dest)) { fs.mkdirSync(dest, { recursive: true }); } fs.readdirSync(src).forEach(file => { if (file.endsWith('.json')) { fs.copyFileSync(path.join(src, file), path.join(dest, file)); } });\"",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
-  },
-  "devDependencies": {
-    "@types/node": "18.x",
-    "@types/vscode": "^1.74.0",
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
-    "eslint": "^8.47.0",
-    "typescript": "^5.1.6",
-    "@types/minimatch": "^5.1.2"
+    "vscode:prepublish": "npm run build -- --production",
+    "build": "node scripts/build.mjs",
+    "watch": "node scripts/build.mjs --watch",
+    "gen": "node scripts/generate-config.mjs",
+    "typecheck": "tsc -p . --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "node test/integration/run.mjs",
+    "package": "vsce package",
+    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "minimatch": "^10.1.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.5",
+    "@types/vscode": "~1.97.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.0.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "mocha": "^12.0.3",
+    "tinyglobby": "^0.2.17",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.4"
   }
 }

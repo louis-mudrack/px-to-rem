@@ -1,0 +1,14 @@
+**
+!dist/extension.js
+!dist/web/extension.js
+!dist/webview/**
+!l10n/**
+!media/**
+!walkthrough/**
+!schemas/**
+!package.json
+!package.nls*.json
+!README.md
+!CHANGELOG.md
+!LICENSE.md
+!logo.jpg
