@@ -40,7 +40,7 @@ export class PasteProvider implements vscode.DocumentPasteEditProvider {
         const start = document.offsetAt(range.start);
         const end = document.offsetAt(range.end);
         const virtual = text.slice(0, start) + pasted + text.slice(end);
-        const { doc, ctx } = this.engine.parseText(virtual, document.languageId, document.uri);
+        const { doc, ctx } = this.engine.parseText(virtual, this.engine.languageId(document), document.uri);
         const plan = planConversion(doc, options, ctx, l => l.start >= start && l.end <= start + pasted.length);
         if (!plan.edits.length) {
             return undefined;

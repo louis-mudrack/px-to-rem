@@ -19,7 +19,7 @@ function activeState(services: Services, uri?: vscode.Uri): { editor: vscode.Tex
     }
     if (!services.engine.isSupported(editor.document)) {
         void vscode.window.showInformationMessage(
-            vscode.l10n.t('PX to REM is not active for {0} files. Add the language to pxToRem.languages to enable it.', editor.document.languageId),
+            vscode.l10n.t('PX to REM is not active for {0} files. Add the language to pxToRem.languages to enable it.', services.engine.languageId(editor.document)),
         );
         return undefined;
     }

@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import type { ProjectContext } from '../core/context';
 import { parseDocument, type ParsedDocument } from '../core/document';
 import type { Options } from '../core/options';
-import { hostForLanguage } from '../core/syntax';
+import { hostForLanguage, languageForFileName } from '../core/syntax';
 import type { ConfigService } from './config';
 import type { ProjectService } from './project';
 import type { WorkspaceIndex } from './workspaceIndex';
@@ -45,17 +45,30 @@ export class Engine implements vscode.Disposable {
         );
     }
 
+    /**
+     * The language the engine treats a document as. VS Code has no built-in
+     * Sass (indented), Stylus, Vue, Svelte or Astro language, so without those
+     * extensions such files are plain text; fall back to the file extension.
+     */
+    languageId(document: vscode.TextDocument): string {
+        if (hostForLanguage(document.languageId)) {
+            return document.languageId;
+        }
+        return languageForFileName(document.uri.path) ?? document.languageId;
+    }
+
     options(document: vscode.TextDocument): Options {
-        return this.config.optionsFor(document.uri, document.languageId);
+        return this.config.optionsFor(document.uri, this.languageId(document));
     }
 
     /** Whether the extension works in this document at all. */
     isSupported(document: vscode.TextDocument): boolean {
-        if (!SUPPORTED_SCHEMES.has(document.uri.scheme) || !hostForLanguage(document.languageId)) {
+        const languageId = this.languageId(document);
+        if (!SUPPORTED_SCHEMES.has(document.uri.scheme) || !hostForLanguage(languageId)) {
             return false;
         }
         const options = this.options(document);
-        if (!options.languages.includes(document.languageId)) {
+        if (!options.languages.includes(languageId)) {
             return false;
         }
         if (document.uri.scheme === 'file' || document.uri.scheme === 'vscode-vfs') {
@@ -81,14 +94,15 @@ export class Engine implements vscode.Disposable {
             jsUnitlessNumbers: options.js.unitlessNumbers && !ctx.reactNative,
             jsTemplates: options.js.templateLiterals,
         };
-        const key = JSON.stringify(parseOptions) + document.languageId;
+        const languageId = this.languageId(document);
+        const key = JSON.stringify(parseOptions) + languageId;
         const uri = document.uri.toString();
         const cached = this.cache.get(uri);
         let doc: ParsedDocument;
         if (cached && cached.version === document.version && cached.key === key) {
             doc = cached.doc;
         } else {
-            doc = parseDocument(document.getText(), document.languageId, parseOptions);
+            doc = parseDocument(document.getText(), languageId, parseOptions);
             this.cache.set(uri, { version: document.version, key, doc });
         }
         return { document, doc, options, ctx };

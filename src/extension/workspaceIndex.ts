@@ -126,10 +126,15 @@ export class WorkspaceIndex implements vscode.Disposable {
     }
 
     rescan(): Promise<void> {
-        this.scanning = this.scan().finally(() => {
-            this.scanned = true;
-            this.changed();
-        });
+        this.scanning = this.scan()
+            .catch(error => {
+                // A failed scan must not break the extension; conversions fall back to settings.
+                console.error('[px-to-rem] workspace scan failed', error);
+            })
+            .finally(() => {
+                this.scanned = true;
+                this.changed();
+            });
         return this.scanning;
     }
 
@@ -268,7 +273,11 @@ export class WorkspaceIndex implements vscode.Disposable {
                 }
             }
             const postcssFiles = await vscode.workspace.findFiles(
-                new vscode.RelativePattern(folder, '{postcss.config.{js,cjs,mjs,ts},.postcssrc,.postcssrc.{json,js,cjs,yml,yaml}}'),
+                // VS Code's file search does not allow nested {} groups.
+                new vscode.RelativePattern(
+                    folder,
+                    '{postcss.config.js,postcss.config.cjs,postcss.config.mjs,postcss.config.ts,.postcssrc,.postcssrc.json,.postcssrc.js,.postcssrc.cjs}',
+                ),
                 ALWAYS_EXCLUDED_GLOB,
                 5,
             );

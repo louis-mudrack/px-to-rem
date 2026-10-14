@@ -24,7 +24,7 @@ import { registerMigrationView } from './views/migrationTree';
 import { WorkspaceIndex } from './workspaceIndex';
 
 /** Languages the providers are registered for; `pxToRem.languages` narrows this per document. */
-const SELECTOR: vscode.DocumentSelector = [
+const SELECTOR: vscode.DocumentFilter[] = [
     'css',
     'postcss',
     'tailwindcss',
@@ -48,7 +48,10 @@ const SELECTOR: vscode.DocumentSelector = [
     'typescript',
     'javascriptreact',
     'typescriptreact',
-].map(language => ({ language }));
+]
+    .map(language => ({ language }) as vscode.DocumentFilter)
+    // Files VS Code has no built-in language for (plain text unless an extension adds one).
+    .concat([{ pattern: '**/*.{sass,styl,stylus,vue,svelte,astro,pcss,postcss}' }]);
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
     const config = new ConfigService();

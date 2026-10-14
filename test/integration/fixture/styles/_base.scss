@@ -1,0 +1,15 @@
+@use 'sass:math';
+
+html {
+  font-size: 62.5%;
+}
+
+@function rem($px, $base: 10px) {
+  @return math.div($px, $base) * 1rem;
+}
+
+$space-1: 4px;
+$space-2: 8px;
+$space-3: 12px;
+$space-4: 16px;
+$space-6: 24px;
