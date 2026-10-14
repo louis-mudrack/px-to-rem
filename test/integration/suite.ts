@@ -190,6 +190,83 @@ function defineTests(): void {
             }
         });
 
+        test('hover explains clamp() at each breakpoint', async () => {
+            const editor = await open('styles/plain.css');
+            const original = editor.document.getText();
+            await reset(editor, '.a { font-size: clamp(1rem, 0.5rem + 2vw, 2rem); }\n');
+            const hovers = await vscode.commands.executeCommand<vscode.Hover[]>('vscode.executeHoverProvider', editor.document.uri, new vscode.Position(0, 18));
+            const text = hovers.flatMap(h => h.contents.map(c => (typeof c === 'string' ? c : 'value' in c ? c.value : ''))).join('\n');
+            assert.ok(text.includes('375px'), text);
+            assert.ok(text.includes('WCAG 1.4.4'), text);
+            await reset(editor, original);
+        });
+
+        test('quick fix merges media-query overrides into clamp()', async () => {
+            const editor = await open('styles/plain.css');
+            const original = editor.document.getText();
+            await reset(editor, '.t {\n  font-size: 16px;\n}\n@media (min-width: 1440px) {\n  .t {\n    font-size: 24px;\n  }\n}\n');
+            const pos = new vscode.Position(1, 5);
+            const actions = await vscode.commands.executeCommand<vscode.CodeAction[]>('vscode.executeCodeActionProvider', editor.document.uri, new vscode.Range(pos, pos));
+            const merge = actions.find(a => a.title.startsWith('Merge 2 breakpoint values'));
+            assert.ok(merge?.edit, actions.map(a => a.title).join(' | '));
+            await vscode.workspace.applyEdit(merge.edit);
+            const text = editor.document.getText();
+            assert.ok(text.includes('font-size: clamp('), text);
+            assert.ok(!text.includes('@media'), text);
+            await reset(editor, original);
+        });
+
+        test('step up moves along the token scale', async () => {
+            const editor = await open('styles/card.scss');
+            const original = editor.document.getText();
+            await reset(editor, '.s { margin: 12px; }\n');
+            editor.selection = new vscode.Selection(new vscode.Position(0, 14), new vscode.Position(0, 14));
+            await vscode.commands.executeCommand('px-to-rem.stepUp');
+            assert.strictEqual(editor.document.getText(), '.s { margin: 16px; }\n');
+            await reset(editor, original);
+        });
+
+        test('paste as rem converts pasted CSS in context', async () => {
+            const editor = await open('styles/plain.css');
+            const original = editor.document.getText();
+            await reset(editor, '.p {\n  font-size: 20px;\n  \n}\n');
+            editor.selection = new vscode.Selection(new vscode.Position(2, 2), new vscode.Position(2, 2));
+            await vscode.env.clipboard.writeText('line-height: 30px; padding: 10px;');
+            await vscode.commands.executeCommand('editor.action.pasteAs', { kind: 'text.pxToRem' });
+            const text = await waitFor(() => editor.document.getText(), t => t.includes('line-height'));
+            // The surrounding rule's font size makes the pasted line-height unitless.
+            assert.ok(text.includes('line-height: 1.5; padding: 1rem;'), text);
+            await reset(editor, original);
+        });
+
+        test('changed-lines scope only reports edited lines', async () => {
+            const config = vscode.workspace.getConfiguration('pxToRem');
+            await config.update('diagnostics.scope', 'changedLines', vscode.ConfigurationTarget.Workspace);
+            try {
+                const editor = await open('styles/plain.css');
+                const original = editor.document.getText();
+                await editor.edit(b => b.insert(new vscode.Position(3, 0), '  line-height: 24px;\n'));
+                const diagnostics = await waitFor(
+                    () => vscode.languages.getDiagnostics(editor.document.uri).filter(d => d.source === 'px-to-rem'),
+                    d => d.length > 0 && d.every(x => x.range.start.line === 3),
+                );
+                assert.ok(diagnostics.every(d => d.range.start.line === 3));
+                await reset(editor, original);
+            } finally {
+                await config.update('diagnostics.scope', undefined, vscode.ConfigurationTarget.Workspace);
+            }
+        });
+
+        test('generates a token file from the values in use', async () => {
+            // The command ends with a notification that waits for the user, so it is not awaited.
+            void vscode.commands.executeCommand('px-to-rem.generateTokens', 'css');
+            const doc = await waitFor(
+                () => vscode.workspace.textDocuments.find(d => d.isUntitled && d.languageId === 'css'),
+                d => !!d,
+            );
+            assert.ok(doc!.getText().includes('--space-'), doc!.getText());
+        });
+
         test('commands that open UI do not throw', async () => {
             await vscode.commands.executeCommand('px-to-rem.openDashboard');
             await sleep(500);

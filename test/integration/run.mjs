@@ -1,6 +1,7 @@
 // Runs the extension inside a real VS Code instance against a copy of the fixture workspace.
 import { runTests } from '@vscode/test-electron';
 import * as esbuild from 'esbuild';
+import { execFileSync } from 'node:child_process';
 import { cpSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -19,6 +20,11 @@ await esbuild.build({
 
 const workspace = mkdtempSync(join(tmpdir(), 'px-to-rem-ws-'));
 cpSync('test/integration/fixture', workspace, { recursive: true });
+// A git repository with one commit, for the changed-lines features.
+const git = (...args) => execFileSync('git', ['-c', 'user.email=test@example.com', '-c', 'user.name=Test', ...args], { cwd: workspace, stdio: 'ignore' });
+git('init', '-q');
+git('add', '-A');
+git('commit', '-qm', 'fixture');
 
 try {
     await runTests({
