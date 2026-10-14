@@ -162,3 +162,12 @@ describe('review regressions', () => {
         expect(JSON.parse(result.out).map((f: { file: string }) => f.file)).toEqual(['café.css']);
     });
 });
+
+describe('literal paths', () => {
+    it('treats existing file paths with glob characters literally', async () => {
+        const dir = project({ 'pages/[id].vue': '<style>.a { margin: 16px }</style>\n', 'pages/i.vue': '<style>.b { margin: 16px }</style>\n' });
+        await cli(dir, 'fix', join(dir, 'pages/[id].vue'));
+        expect(readFileSync(join(dir, 'pages/[id].vue'), 'utf8')).toBe('<style>.a { margin: 1rem }</style>\n');
+        expect(readFileSync(join(dir, 'pages/i.vue'), 'utf8')).toBe('<style>.b { margin: 16px }</style>\n');
+    });
+});

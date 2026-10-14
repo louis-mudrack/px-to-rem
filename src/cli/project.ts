@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
-import { glob } from 'tinyglobby';
+import { escapePath, glob } from 'tinyglobby';
 import { createContext, type ProjectContext, type RemFunctionDef } from '../core/context';
 import {
     chooseRootFontSize,
@@ -98,8 +98,11 @@ export async function findFiles(root: string, patterns: string[], options: Optio
     const rooted = fromCwd.map(pattern => {
         const negated = pattern.startsWith('!');
         const body = negated ? pattern.slice(1) : pattern;
-        const relativeToRoot = toPosix(relative(root, resolve(cwd, body))) || '.';
-        return (negated ? '!' : '') + relativeToRoot;
+        const absolute = resolve(cwd, body);
+        const relativeToRoot = toPosix(relative(root, absolute)) || '.';
+        // Literal file paths (e.g. from lint-staged) may contain glob characters: `pages/[id].vue`.
+        const isFile = existsSync(absolute) && statSync(absolute).isFile();
+        return (negated ? '!' : '') + (isFile ? escapePath(relativeToRoot) : relativeToRoot);
     });
     const files = await glob(rooted, { cwd: root, ignore, absolute: true, dot: false, onlyFiles: true });
     // Normalise separators so lookups (e.g. --changed) match on every platform.

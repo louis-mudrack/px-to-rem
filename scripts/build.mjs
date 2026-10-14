@@ -1,6 +1,6 @@
 // Bundles the desktop extension, the web extension, the dashboard webview and the CLI.
 import * as esbuild from 'esbuild';
-import { chmodSync, existsSync, mkdirSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, rmSync } from 'node:fs';
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -54,6 +54,11 @@ const targets = [
     },
 ].filter(t => existsSync(t.entryPoints[0]));
 
+if (production) {
+    // No stale development output (source maps) in packages.
+    rmSync('dist', { recursive: true, force: true });
+    rmSync('cli/dist', { recursive: true, force: true });
+}
 mkdirSync('dist', { recursive: true });
 
 if (watch) {

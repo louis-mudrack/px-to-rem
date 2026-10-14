@@ -1359,10 +1359,9 @@
     "test:watch": "vitest",
     "test:integration": "node test/integration/run.mjs",
     "package": "vsce package",
-    "check": "npm run typecheck && npm run lint && npm run test && npm run build"
-  },
-  "dependencies": {
-    "minimatch": "^10.1.1"
+    "check": "npm run check:generated && npm run typecheck && npm run lint && npm run test && npm run build",
+    "l10n": "node scripts/extract-l10n.mjs",
+    "check:generated": "node scripts/generate-config.mjs --check && node scripts/extract-l10n.mjs --check"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -1374,6 +1373,7 @@
     "esbuild": "^0.28.2",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
+    "minimatch": "^10.1.1",
     "mocha": "^11.8.0",
     "tinyglobby": "^0.2.17",
     "typescript": "~5.9.3",
