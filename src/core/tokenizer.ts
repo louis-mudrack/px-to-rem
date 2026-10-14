@@ -343,7 +343,7 @@ export function tokenize(text: string, start: number, end: number, options: Toke
 }
 
 /** Significant tokens (no whitespace or comments), annotated with `newlineBefore`. */
-export function significant(text: string, tokens: readonly Token[]): Token[] {
+export function significant(text: string, tokens: Token[]): Token[] {
     const out: Token[] = [];
     let sawNewline = true;
     for (const token of tokens) {
@@ -353,7 +353,9 @@ export function significant(text: string, tokens: readonly Token[]): Token[] {
             }
             continue;
         }
-        out.push({ ...token, newlineBefore: sawNewline });
+        // Tokens are freshly created by tokenize(), so annotating in place is safe and avoids copies.
+        token.newlineBefore = sawNewline;
+        out.push(token);
         sawNewline = false;
     }
     return out;

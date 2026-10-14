@@ -189,13 +189,16 @@ export const LENGTH_UNITS: ReadonlySet<string> = new Set([
 ]);
 
 /** Rules that compare a property against a glob pattern such as `border-*-width`. */
+const patternCache = new Map<string, RegExp | string>();
+
 export function matchesPropertyPattern(property: string, pattern: string): boolean {
-    const p = pattern.trim().toLowerCase();
-    if (!p.includes('*')) {
-        return property === p;
+    let compiled = patternCache.get(pattern);
+    if (compiled === undefined) {
+        const p = pattern.trim().toLowerCase();
+        compiled = p.includes('*') ? new RegExp('^' + p.split('*').map(escapeRegExp).join('.*') + '$') : p;
+        patternCache.set(pattern, compiled);
     }
-    const regex = new RegExp('^' + p.split('*').map(escapeRegExp).join('.*') + '$');
-    return regex.test(property);
+    return typeof compiled === 'string' ? property === compiled : compiled.test(property);
 }
 
 /** Number of literal characters, used to pick the most specific matching pattern. */
@@ -207,8 +210,24 @@ export function escapeRegExp(s: string): string {
     return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-/** Finds the most specific rule for a property. */
+const lookupCache = new WeakMap<object, Map<string, unknown>>();
+
+/** Finds the most specific rule for a property (memoized per rules object). */
 export function lookupRule<T>(rules: Readonly<Record<string, T>>, property: string): T | undefined {
+    let cache = lookupCache.get(rules);
+    if (!cache) {
+        cache = new Map();
+        lookupCache.set(rules, cache);
+    }
+    if (cache.has(property)) {
+        return cache.get(property) as T | undefined;
+    }
+    const found = findRule(rules, property);
+    cache.set(property, found);
+    return found;
+}
+
+function findRule<T>(rules: Readonly<Record<string, T>>, property: string): T | undefined {
     let best: T | undefined;
     let bestScore = -1;
     for (const [pattern, value] of Object.entries(rules)) {

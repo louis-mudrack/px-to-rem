@@ -343,6 +343,7 @@ function scanTokens(
     doc: ParsedDocument,
 ): void {
     const frames: Frame[] = [];
+    const calls: FunctionCallNode[] = [];
     const interpStack: { tokenIndex: number; callsBefore: number }[] = [];
     const isFont = ctx.decl?.property === 'font';
     let lastFontLength: LengthNode | undefined;
@@ -382,6 +383,7 @@ function scanTokens(
                 };
                 frames.push({ name, call, argStart: i + 2 });
                 doc.functions.push(call);
+                calls.push(call);
                 i++;
                 break;
             }
@@ -475,11 +477,8 @@ function scanTokens(
 
     // Function-call colours: rgb(), rgba(), hsl(), hsla().
     if (ctx.context === 'declaration' || ctx.context === 'variable' || ctx.context === 'custom-property') {
-        for (const call of doc.functions) {
-            if (call.decl !== ctx.decl || call.region !== region || !/^(rgba?|hsla?)$/.test(call.name)) {
-                continue;
-            }
-            if (doc.colors.some(c => c.start === call.start)) {
+        for (const call of calls) {
+            if (!/^(rgba?|hsla?)$/.test(call.name)) {
                 continue;
             }
             const rgba = parseColorFunction(call.name, text.slice(call.argsSpan.start, call.argsSpan.end));

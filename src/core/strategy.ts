@@ -109,6 +109,18 @@ export function effectiveProperty(length: LengthNode): string {
     return length.decl?.property ?? '';
 }
 
+const mergedRules = new WeakMap<Record<string, SmartAction>, Record<string, SmartAction>>();
+
+/** Default smart rules merged with the user's, cached per options object. */
+function smartRules(options: Options): Record<string, SmartAction> {
+    let merged = mergedRules.get(options.smartRules);
+    if (!merged) {
+        merged = { ...DEFAULT_SMART_RULES, ...options.smartRules };
+        mergedRules.set(options.smartRules, merged);
+    }
+    return merged;
+}
+
 /** Decides what to do with one length. */
 export function decide(doc: ParsedDocument, length: LengthNode, options: Options, ctx: ProjectContext): Decision {
     if (length.unit !== 'px') {
@@ -216,8 +228,7 @@ export function decide(doc: ParsedDocument, length: LengthNode, options: Options
         const category = categoryForName(property);
         action = category === 'border' || category === 'shadow' || category === 'breakpoint' ? 'keep' : 'convert';
     } else {
-        const rules = { ...DEFAULT_SMART_RULES, ...options.smartRules };
-        action = lookupRule(rules, property) ?? 'convert';
+        action = lookupRule(smartRules(options), property) ?? 'convert';
     }
 
     // Hairlines (1px nudges, separators) stay crisp; text-relative values still scale.
