@@ -1,724 +1,249 @@
-# PX zu REM Konverter
+# PX to REM Toolkit
 
-[![Version](https://img.shields.io/badge/version-1.1.1-blue.svg)](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
-[![Installationen](https://img.shields.io/visual-studio-marketplace/i/LouisMudrack.px-to-rem-function.svg)](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
+[![Visual Studio Marketplace](https://img.shields.io/visual-studio-marketplace/v/LouisMudrack.px-to-rem-function?label=Marketplace)](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
+[![Installationen](https://img.shields.io/visual-studio-marketplace/i/LouisMudrack.px-to-rem-function)](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
+[![CI](https://github.com/louis-mudrack/px-to-rem/actions/workflows/ci.yml/badge.svg)](https://github.com/louis-mudrack/px-to-rem/actions/workflows/ci.yml)
 [![English](https://img.shields.io/badge/lang-en-red.svg)](README.md)
-[![Sprache](https://img.shields.io/badge/lang-de-green.svg)](README.de.md)
 
-> Professionelle VSCode Extension, die automatisch `px`-Werte in `rem()`-Funktionen umwandelt mit Enterprise-Features. Perfekt für Teams und große Projekte.
+**Skalierbares CSS ohne Fleißarbeit.** Wandelt `px` in `rem`, `em`, `vw` oder deine eigene `rem()`-Funktion um – mit der passenden Einheit für jede Eigenschaft, überall dort, wo CSS steht, und mit Prüfungen, die dafür sorgen, dass es so bleibt.
 
-**Features:** Datei-Ignoring • Typ-Auswahl • Mehrsprachig • 18+ Konvertierungs-Features • Code Lens • Quick Fix • Batch-Operationen
+```scss
+// Vorher                               // Nachher (Strg+Alt+R)
+.card {                                 .card {
+  font-size: 18px;                        font-size: 1.125rem;
+  line-height: 27px;                      line-height: 1.5;          // einheitenlos, aus der Schriftgröße
+  letter-spacing: 0.9px;                  letter-spacing: 0.05em;    // em, wächst mit dem Text
+  padding: 16px 24px;                     padding: 1rem 1.5rem;
+  border: 1px solid;                      border: 1px solid;         // Haarlinien bleiben scharf
+  @media (min-width: 768px) {             @media (min-width: 48em) { // em: folgt der Schriftgröße der Nutzer
+    font-size: 24px;                        font-size: 1.5rem;
+  }                                       }
+}                                       }
+```
+
+## Highlights
+
+- **Smarte Einheiten pro Eigenschaft** – rem für Größen, einheitenlose line-height, em für letter-spacing, px für Rahmen, em für Breakpoints. Jede Entscheidung wird im Hover erklärt.
+- **Liest dein Projekt** – findet `html { font-size: 62.5% }`, deine `rem()`-Hilfsfunktion, den `rootValue` von postcss-pxtorem, Design Tokens und Tailwind. Ohne Einrichtung.
+- **Überall, wo CSS steht** – CSS, SCSS, Sass, Less, Stylus, PostCSS, `<style>`-Blöcke und `style=""` in HTML, Vue, Svelte, Astro und PHP, styled-components-/emotion-Templates, React-Style-Objekte und Tailwind-Arbitrary-Values (`p-[16px]` → `p-4`).
+- **Fluide Typografie** – `clamp()` erzeugen, Media-Query-Overrides zu einem fluiden Wert zusammenführen und sehen, was ein `clamp()`/`calc()` an jedem Breakpoint ergibt.
+- **Barrierefreiheits-Prüfung** – WCAG-1.4.4-Prüfungen für px-Schriftgrößen, px-Zeilenhöhen, feste Höhen bei Text, reine Viewport-Schriftgrößen und fluide Schrift, die mit Browser-Zoom keine 200 % erreicht.
+- **Design Tokens** – Werte an deine Abstands- und Schriftskala anpassen, Werte außerhalb der Skala und fast passende Farben markieren oder aus den bereits verwendeten Werten eine Token-Datei erzeugen.
+- **Sichere Migrationen** – Umwandlung des Arbeitsbereichs über die Refactoring-Vorschau von VS Code, git-basierter Modus „nur geänderte Zeilen“, Fortschrittsansicht und Werte-Audit-Dashboard.
+- **Dieselben Regeln in der CI** – die [`px-to-rem`-CLI](cli/README.md) führt dieselbe Engine und deine `.pxtoremrc.json` in Pipelines und Pre-Commit-Hooks aus.
+
+Läuft in VS Code 1.97+, Cursor, VSCodium und auf [vscode.dev](https://vscode.dev). Oberfläche auf Deutsch, Englisch, Französisch, Spanisch, Italienisch, Portugiesisch (Brasilien), Japanisch, Chinesisch (vereinfacht) und Koreanisch.
 
 ---
 
-## 📦 Installation
+## Schnellstart
 
-### Aus VSCode Marketplace (Empfohlen)
+1. Aus dem [Marketplace](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function) installieren oder `code --install-extension LouisMudrack.px-to-rem-function` ausführen.
+2. Ein Stylesheet öffnen und **Strg+Alt+R** drücken (macOS **⌃⌘R**). Mit einer Auswahl wird nur die Auswahl umgewandelt, sonst die ganze Datei – in einem Rückgängig-Schritt.
+3. Optional: **PX to REM: Projekt einrichten…** ausführen, um zu sehen, was erkannt wurde, und eine gemeinsame `.pxtoremrc.json` zu speichern.
 
-**Methode 1: VSCode UI**
-1. Öffne VSCode
-2. Gehe zu Extensions (`Strg+Shift+X` / `Cmd+Shift+X`)
-3. Suche nach "PX to REM Converter"
-4. Klicke auf **Installieren**
+| Tastenkürzel | Aktion |
+|---|---|
+| `Strg+Alt+R` / `⌃⌘R` | Auswahl oder Datei umwandeln |
+| `Strg+Alt+U` / `⌃⌘U` | Wert am Cursor durchschalten: `16px` → `1rem` → `1em` → `1.1111vw` → Token → `16px` |
+| `Umschalt+Alt+Bild↑` / `Bild↓` | Wert auf deiner Token-Skala (oder einem 4px-/Schriftraster) eine Stufe hoch oder runter |
+| `Strg+.` | Quick Fixes: andere Einheiten, Tokens, an Skala anpassen, Regel/Datei umwandeln, Zeile ignorieren |
 
-**Methode 2: Kommandozeile**
+Die Tastenkürzel gelten nur in unterstützten Dateien. Alles findest du auch im Kontextmenü des Editors (**PX to REM**) und im Menü der Statusleiste (Klick auf `16px · 12 px`).
+
+> **Update von 1.x?** `Strg+K` wandelt nicht mehr um (es blockierte alle `Strg+K …`-Tastenfolgen von VS Code). Siehe [Umstieg von 1.x](#umstieg-von-1x).
+
+---
+
+## Wie Werte umgewandelt werden
+
+### Smart-Modus (Standard)
+
+| Eigenschaft | Wird zu | Warum |
+|---|---|---|
+| `font-size`, Abstände, Größen, Radien | `rem` (oder dein Format) | Folgt der im Browser eingestellten Schriftgröße |
+| `line-height` | einheitenlos `1.5` | Wächst mit der Schriftgröße des Elements; braucht die Schriftgröße der Regel |
+| `letter-spacing`, `word-spacing`, `text-underline-offset` | `em` | Bleibt proportional zum Text |
+| `border*`, `outline*`, `box-shadow`, `text-shadow`, `filter` | bleibt `px` | Haarlinien und Schatten sollen scharf bleiben |
+| Werte bis `1px` (`hairline`) | bleibt `px` | 1px-Korrekturen und Trennlinien |
+| `@media` / `@container` | `em` | Breakpoints beziehen sich auf die Browser-Standardgröße (16px), nicht auf deine `html`-Schriftgröße |
+| Breakpoint-Mixins (`@include mq($from: 768px)`) | unverändert | Das Mixin entscheidet |
+
+Die Schriftgröße eines Elements wird über die Regel selbst, `font`-Kurzschreibweisen, Verschachtelung und Selektoren wie `&:hover` ermittelt. Ist sie nicht bestimmbar, wird rem verwendet. Jede Regel lässt sich mit `pxToRem.smartRules` ändern, z. B. `{ "border": "convert", "letter-spacing": "rem" }`; mit `pxToRem.mode: "simple"` wird alles gleich umgewandelt.
+
+### Ausgabeformate
+
+`pxToRem.format` (pro Sprache einstellbar mit `"[scss]": { "pxToRem.format": … }`):
+
+| Format | Aus `16px` wird |
+|---|---|
+| `auto` (Standard) | `rem(16)` in Sass/Less/Stylus, wenn das Projekt eine `rem()`-Funktion definiert, sonst `1rem` |
+| `rem` | `1rem` |
+| `rem-function` / `rem-function-px` | `rem(16)` / `rem(16px)` |
+| `em`, `vw`, `vh`, `vmin`, `vmax`, `rpx`, `pt` | relativ zur Schriftgröße des Elements bzw. zu `designWidth`/`designHeight` |
+| beliebiges Template | z. B. `toRem({px})`, `{rem}rem`, `calc({px} * var(--unit))` |
+
+Funktionsformate werden nie in reines CSS, Inline-Styles, JS-Objekte oder Tailwind-Klassen geschrieben (dort wären sie ungültig); in styled-components-Templates werden sie zu `${rem(16)}`. Mit `interpolateInCalc` erhält Sass innerhalb von `calc()` ein `#{rem(16)}`.
+
+### Was nie angefasst wird
+
+Kommentare, Strings, `url()`, Selektoren und Klassennamen (`.mt-16px`), Werte, die bereits an `rem()` übergeben werden, Sass-`@function`-Rümpfe und Kontrollstrukturen, Interpolation, großgeschriebenes `PX` (der Opt-out von postcss-pxtorem) und Zeilen, die du deaktivierst:
+
+```css
+.legacy {
+  /* px-to-rem-disable-next-line */
+  width: 320px;
+  height: 200px; /* px-to-rem-disable-line */
+}
+/* px-to-rem-disable */
+.email-table { padding: 8px; }
+/* px-to-rem-enable */
+```
+
+`// …`-Kommentare funktionieren in Sass, Less, Stylus und JS, `<!-- px-to-rem-disable-next-line -->` in HTML. `px-to-rem-disable-file` überspringt eine Datei. Auch `pxtorem-disable-next-line` von postcss-pxtorem wird verstanden.
+
+### Root-Schriftgröße
+
+1rem wird in dieser Reihenfolge ermittelt: ein explizites `pxToRem.baseFontSize` (Einstellungen oder `.pxtoremrc.json`), der `rootValue` von postcss-pxtorem, `html`-/`:root`-Schriftgrößen in deinen Stylesheets (`62.5%` → 10px), sonst 16px. Die Statusleiste zeigt den Wert und seine Herkunft. **rem-Werte neu berechnen (Root-Schriftgröße ändern)…** schreibt beim Wechsel der Root-Schriftgröße (z. B. Abschied vom 62.5-%-Trick) alle rem-Werte im Projekt so um, dass sich optisch nichts ändert.
+
+---
+
+## Überall, wo CSS steht
+
+| Wo | Beispiel |
+|---|---|
+| Stylesheets | `.css`, `.scss`, `.sass`, `.less`, `.styl`, `.pcss` (inklusive eingerücktem Sass und Stylus) |
+| Markup | `<style lang="scss">`-Blöcke und `style=""` in HTML, Vue, Svelte, Astro, PHP, Blade, Twig, Handlebars, Liquid… |
+| CSS-in-JS | ``styled.div`…` ``, ``styled(Button).attrs(…)`…` ``, ``css`…` ``, ``createGlobalStyle`…` ``, ``keyframes`…` `` |
+| Style-Objekte | `{ fontSize: '16px' }` → `{ fontSize: '1rem' }`; mit `js.unitlessNumbers` auch `{ width: 320 }` → `{ width: '20rem' }` (nie in React-Native-Projekten) |
+| Tailwind | `p-[16px]` → `p-4`, `text-[14px]` → `text-sm`, `w-[13px]` → `w-[0.8125rem]`; `@apply`, Varianten und `!important` bleiben erhalten |
+
+---
+
+## Fluide Typografie und clamp()
+
+- **Wert mit clamp() fluid machen…** fragt nach kleiner und großer Größe sowie dem Viewport-Bereich und schreibt `clamp(1rem, 0.8239rem + 0.7512vw, 1.5rem)`. Mit `fluid.unit: "cqi"` skaliert der Wert mit Containern.
+- **Breakpoints zusammenführen** (Quick Fix auf einer Deklaration) macht aus `font-size: 16px` plus `@media (min-width: 1024px) { font-size: 24px }` ein einziges `clamp()` und entfernt die Overrides – verschachtelt oder in eigenen Media-Blöcken, mobile-first oder desktop-first.
+- **Hover über `clamp()`, `calc()`, `min()` oder `max()`** zeigt eine Tabelle der Werte an jedem Breakpoint und ob der Text mit Browser-Zoom noch 200 % erreicht.
+
+## Barrierefreiheits-Prüfung
+
+Diagnosen erklären, *warum* ein Wert Nutzern schadet, und bringen Quick Fixes mit. Alle Regeln und Schweregrade lassen sich in `pxToRem.diagnostics.rules` einstellen; siehe [Regelreferenz](docs/rules.md) (Englisch).
+
+| Regel | Standard | Findet |
+|---|---|---|
+| `font-size-px` | information | px-Schriftgrößen ignorieren die Browser-Schriftgröße (WCAG 1.4.4) |
+| `line-height-px` | information | px-Zeilenhöhen wachsen nicht mit dem Text |
+| `letter-spacing-px` | hint | px-letter-spacing skaliert nicht mit der Schrift |
+| `media-query-px` | hint | px-Breakpoints ignorieren die Schriftgröße der Nutzer |
+| `fixed-height-text` | hint | feste Höhen schneiden vergrößerten Text ab (WCAG 1.4.4, 1.4.12) |
+| `text-width-px` | hint | px-max-width bei Text wächst nicht mit der Schrift |
+| `viewport-font-size` | warning | Schriftgrößen nur aus `vw` lassen sich nicht zoomen |
+| `fluid-zoom` | warning | fluide Schriftgrößen, die mit Zoom keine 200 % erreichen |
+| `off-scale` | hint | Werte außerhalb deiner Token-Skala, mit Quick Fixes zum Anpassen |
+| `off-palette` | hint | Farben, die fast einem Farb-Token entsprechen |
+| `rem-function-missing` | warning | `rem()` wird verwendet, ist aber nirgends definiert – mit Generator |
+| `px-unit` | off | jeder umwandelbare px-Wert |
+
+Mit `"diagnostics.scope": "changedLines"` wird nur auf Zeilen gemeldet, die seit dem letzten Commit geändert wurden.
+
+## Design Tokens
+
+Tokens werden aus CSS Custom Properties (`:root`, `html`, Themes, Tailwind v4 `@theme`), Sass-/Less-/Stylus-Variablen und Sass-Maps sowie aus JSON-Token-Dateien (W3C DTCG inklusive 2025er-Format, Tokens Studio, Style Dictionary) gelesen. Gib die Dateien mit `tokens.sources` an oder lass sie automatisch finden.
+
+- Hover über einen px-Wert zeigt das passende Token oder die Tokens drumherum.
+- Quick Fixes und Vervollständigungen bieten `var(--space-4)`, `$space-md`, `map.get($spacing, md)` an.
+- `tokens.preferTokens: true` wandelt exakte Treffer in das Token statt in rem um.
+- **Eine Stufe hoch/runter** bewegt sich entlang deiner Skala; fast passende Farben bekommen einen Fix.
+- **Design Tokens aus verwendeten Werten generieren…** schlägt Abstands-, Schrift- und Radius-Skalen aus deinem Code vor und schreibt CSS, Sass, Sass-Maps, Less, Stylus, Tailwind v4 `@theme` oder DTCG-JSON.
+
+## Eine Codebasis migrieren
+
+- **Arbeitsbereich umwandeln…** – alle Dateien, ein Ordner, ein Dateityp, geänderte Dateien oder nur geänderte Zeilen. Jede Änderung erscheint in der **Refactoring-Vorschau** von VS Code, wo du vor dem Anwenden alles abwählen kannst; ein Rückgängig macht alles rückgängig.
+- **Beim Speichern umwandeln** – `pxToRem.convertOnSave` oder `"source.pxToRem.convert": "explicit"` in `editor.codeActionsOnSave`.
+- **Als rem einfügen** – beim Einfügen von CSS aus Figma oder den DevTools gibt es im Einfügemenü eine umgewandelte Variante (`paste.mode: "default"` stellt sie an die erste Stelle).
+- **PX-to-REM-Ansicht** (Explorer) – Dateien mit verbleibenden px-Werten und der Anteil bereits skalierender Längen, mit täglichem Verlauf.
+- **Werte-Audit-Dashboard** – alle verwendeten Abstände, Größen, Schriftgrößen und Radien, Ausreißer außerhalb des Rasters mit Links, Rastertreue, die Schriftskala deiner Größen und vorgeschlagene Tokens.
+
+---
+
+## Konfiguration
+
+Einstellungen liegen in VS Code (`pxToRem.*`) und – für das ganze Team und die CLI – in `.pxtoremrc.json` im Projektstamm (JSON mit Kommentaren, validiert und mit Autovervollständigung):
+
+```jsonc
+{
+  "$schema": "https://raw.githubusercontent.com/louis-mudrack/px-to-rem/master/schemas/pxtoremrc.schema.json",
+  "mode": "smart",
+  "format": "auto",
+  "minValue": 2,
+  "tokens": { "sources": ["src/styles/tokens.scss", "tokens/*.json"], "preferTokens": true },
+  "diagnostics": { "scope": "changedLines", "rules": { "font-size-px": "warning" } },
+  "overrides": [
+    { "files": "src/emails/**", "excludeProperties": ["*"] },
+    { "files": "**/*.styl", "format": "rem" }
+  ]
+}
+```
+
+Reihenfolge: Standardwerte → Benutzer → Arbeitsbereich → Ordner-Einstellungen → `.pxtoremrc.json` → passende `overrides` → Deaktivierungs-Kommentare.
+
+Alle Einstellungen sind in der Einstellungsoberfläche unter **PX to REM** beschrieben; die wichtigsten stehen im [englischen README](README.md#configuration).
+
+## Kommandozeile
+
 ```bash
-code --install-extension LouisMudrack.px-to-rem-function
+npx px-to-rem-toolkit check "src/**/*.{css,scss,vue}"   # Exit-Code 1, wenn etwas zu tun ist
+npx px-to-rem-toolkit fix                               # direkt umwandeln
+npx px-to-rem-toolkit check --changed --reporter github # PR-Annotationen, nur geänderte Zeilen
+npx px-to-rem-toolkit report                            # Anteil, Raster, Schriftskala, Ausreißer, Token-Vorschläge
 ```
 
-**Methode 3: Quick Open**
-1. Drücke `Strg+P` (Windows/Linux) oder `Cmd+P` (Mac)
-2. Tippe: `ext install LouisMudrack.px-to-rem-function`
-3. Drücke Enter
+Beispiele für CI und Pre-Commit stehen im [CLI-README](cli/README.md).
 
 ---
 
-## 🚀 Quick Start
+## Umstieg von 1.x
 
-### 1️⃣ Öffne eine CSS/SCSS Datei
-```css
-.container {
-  font-size: 16px;
-  padding: 20px;
-  margin: 10px 0;
-}
-```
+| 1.x | 2.0 |
+|---|---|
+| `Strg+K` wandelte die Datei um | `Strg+Alt+R` / `⌃⌘R`, nur in unterstützten Dateien (`Strg+K`-Tastenfolgen funktionieren wieder) |
+| `Strg+Umschalt+K` wandelte die Auswahl um | `Strg+Alt+R` wandelt die Auswahl um, wenn es eine gibt |
+| `Strg+Ä` wandelte in `rem(16px)` um | `format: "rem-function-px"` oder der Befehl **px in rem(Npx) umwandeln** |
+| `directConversion`, `keepPxInRem` | `format` (wird weiterhin gelesen: `true` → `rem`, `keepPxInRem` → `rem-function-px`) |
+| `scssInterpolation` | `interpolateInCalc` (wird weiterhin gelesen) |
+| `enableDiagnostics`, `diagnosticSeverity` | `diagnostics.rules["px-unit"]` (wird weiterhin gelesen) |
+| `enableCodeLens`, `enableInlayHints` | `codeLens`, `inlayHints.enable` (wird weiterhin gelesen) |
+| `useDynamicBaseFontSize`, `baseFontSizeFile`, `baseFontSizeVariable` | Entfernt. Die Root-Schriftgröße wird automatisch erkannt; mit `baseFontSize` lässt sie sich festlegen |
+| Einstellungen exportieren/importieren | `.pxtoremrc.json` (die Befehle erstellen und befüllen sie jetzt) |
+| `0px` → `rem(0)` | `0` (`preserveZero` ist jetzt standardmäßig `true`) |
+| Alles wurde gleich umgewandelt | Standardmäßig Smart-Modus; `"mode": "simple"` stellt das alte Verhalten her |
+| Standardmäßig `rem(16)` | `auto`: `rem(16)` nur, wo dein Projekt `rem()` definiert; mit `"format": "rem-function"` immer |
 
-### 2️⃣ Drücke `Strg+K` (Windows/Linux) oder `Cmd+K` (Mac)
-
-### 3️⃣ Fertig! 
-```css
-.container {
-  font-size: rem(16);
-  padding: rem(20);
-  margin: rem(10) 0;
-}
-```
-
-**Das war's!** ✨
-
----
-
-## ⌨️ Tastenkürzel
-
-| Shortcut | Aktion | Ergebnis |
-|----------|--------|----------|
-| **`Strg+K`** | Gesamte Datei konvertieren | `rem(16)` |
-| **`Strg+Ä`** | Mit px-Einheit konvertieren | `rem(16px)` |
-| **`Strg+Shift+K`** | Nur Selektion konvertieren | Nur ausgewählte Zeilen |
-| **`Strg+.`** | Quick Fix Menü | Mehrere Optionen |
-
-**Mac:** Ersetze `Strg` mit `Cmd`
-
-**Hinweis:** `Strg+Ä` funktioniert auf deutschen Tastaturen. Für andere Layouts:
-1. Öffne Tastenkürzel (`Strg+K Strg+S`)
-2. Suche nach "px-to-rem.convertWithPx"
-3. Ändere zu deinem bevorzugten Shortcut (z.B. `Strg+Alt+P`)
-
----
-
-## ✨ Features
-
-### 🎯 Basis-Konvertierung
-- **Zwei Modi**: `rem(10)` oder `rem(10px)` per Hotkey
-- **Direct Conversion**: `16px` → `1rem` (konfigurierbare Basis-Schriftgröße)
-- **SCSS Interpolation**: Automatische `#{}` Wrapper in `calc()`
-- **Intelligente Erkennung**: Überspringt bereits konvertierte Werte
-- **Clamp() Support**: Konvertiert Werte in clamp-Funktionen
-- **Negative & Dezimalzahlen**: `-16px`, `16.5px` vollständig unterstützt
-- **Zero Preservation**: Optional `0px` als `0` behalten
-
-### 🔍 Erweiterte Filterung
-- **Min/Max Bereich**: Nur Werte zwischen min und max konvertieren
-- **Property-Filter**: Include/Exclude spezifische CSS Properties
-- **Zeilen-Patterns**: Zeilen mit Regex-Patterns überspringen
-- **Datei-Ignoring**: Dateien mit Glob-Patterns ausschließen
-- **Typ-Auswahl**: Nur bestimmte Dateitypen konvertieren
-
-### 🎨 UI-Features
-- **Inlay Hints**: Permanente graue px-Anzeige neben rem (z.B., `2rem → 32px`)
-- **Status Bar**: Live px-Count mit Click-to-Convert
-- **Code Lens**: Inline "N px-Werte konvertieren" Buttons (umschaltbar)
-- **Quick Fix**: 💡 Glühbirne mit 3 Format-Optionen (`Strg+.`)
-- **Hover Vorschau**: Zeigt Konvertierungs-Vorschau beim Hovern
-- **Diagnostics**: Unterstreicht px-Werte (konfigurierbare Schwere)
-- **Statistiken**: Detaillierte Berichte mit Timing
-
-### 📦 Batch-Operationen
-- **Workspace-Konvertierung**: Alle Dateien auf einmal
-- **Typ-Spezifisch**: Nur CSS, oder nur SCSS, etc.
-- **Selektions-Konvertierung**: Nur ausgewählten Code
-- **Rückwärts-Konvertierung**: rem → px für Rollback
-- **Export/Import**: Settings mit Team teilen
-
-### 🌍 International
-- **Deutsch** & **Englisch** UI (automatisch erkannt)
-- Alle Meldungen, Commands und Dialoge lokalisiert
-- Weitere Sprachen: Community Beiträge willkommen!
-
-### ⚙️ Dynamische Konfiguration
-- **Dynamische Base Font Size**: Aus SCSS/CSS Variablen auslesen
-- **Live Updates**: Automatische Aktualisierung bei Variablen-Änderung
-- **Flexibles Format**: Unterstützt `$base-font-size: 20` oder `20px`
-
----
-
-## ⚙️ Konfiguration
-
-### Wichtige Settings
-
-```json
-{
-  // Konvertierungs-Modus
-  "pxToRem.directConversion": false,        // false = rem(16), true = 1rem
-  "pxToRem.baseFontSize": 16,               // Basis-Größe für Berechnungen
-  
-  // Dynamische Base Font Size
-  "pxToRem.useDynamicBaseFontSize": false,  // Aus SCSS/CSS Datei auslesen
-  "pxToRem.baseFontSizeFile": "src/styles/variables.scss",
-  "pxToRem.baseFontSizeVariable": "$base-font-size",
-  
-  // Inlay Hints
-  "pxToRem.enableInlayHints": true,         // Zeigt "2rem → 32px" in grau
-  
-  // Datei-Filterung
-  "pxToRem.excludeFiles": [
-    "**/*.min.css",                         // Minifizierte Dateien ignorieren
-    "**/vendor/**",                         // Vendor-Code ignorieren
-    "**/node_modules/**"                    // Dependencies ignorieren
-  ],
-  "pxToRem.fileTypes": ["css", "scss", "sass", "less"],
-  
-  // Wert-Filterung
-  "pxToRem.minValue": 0,                    // Minimaler px-Wert (z.B. 4 um 1-3px zu überspringen)
-  "pxToRem.maxValue": 9999,                 // Maximaler px-Wert
-  "pxToRem.excludeProperties": [],          // Properties überspringen (z.B. ["border-width"])
-  
-  // UI
-  "pxToRem.enableCodeLens": true,           // Inline Convert-Buttons zeigen
-  "pxToRem.enableDiagnostics": false        // px-Werte unterstreichen
-}
-```
-
-### Alle Settings
+## FAQ
 
 <details>
-<summary>Klicke um die komplette Settings-Liste zu sehen</summary>
+<summary>Warum werden Rahmen und Media Queries nicht in rem umgewandelt?</summary>
 
-```json
-{
-  // Konvertierung
-  "pxToRem.directConversion": false,
-  "pxToRem.baseFontSize": 16,
-  "pxToRem.keepPxInRem": false,
-  "pxToRem.preserveZero": true,
-  "pxToRem.scssInterpolation": false,
-  
-  // Dynamische Base Font Size
-  "pxToRem.useDynamicBaseFontSize": false,
-  "pxToRem.baseFontSizeFile": "src/styles/variables.scss",
-  "pxToRem.baseFontSizeVariable": "$base-font-size",
-  
-  // Datei-Filterung
-  "pxToRem.excludeFiles": [],
-  "pxToRem.fileTypes": ["css", "scss", "sass", "less"],
-  
-  // Wert-Filterung
-  "pxToRem.minValue": 0,
-  "pxToRem.maxValue": 9999,
-  "pxToRem.includeProperties": [],
-  "pxToRem.excludeProperties": [],
-  "pxToRem.excludePatterns": [],
-  
-  // UI
-  "pxToRem.enableInlayHints": true,
-  "pxToRem.enableCodeLens": true,
-  "pxToRem.enableDiagnostics": false,
-  "pxToRem.diagnosticSeverity": "information"
-}
-```
-</details>
-
----
-
-## 📝 Beispiele
-
-### Vorher
-```css
-.hero {
-  width: 1200px;
-  padding: 40px 80px;
-  margin: 0px auto;
-  font-size: 24px;
-}
-
-.button {
-  height: 48px;
-  padding: 12px 24px;
-  border-radius: 8px;
-}
-```
-
-### Nachher `Strg+K`
-```css
-.hero {
-  width: rem(1200);
-  padding: rem(40) rem(80);
-  margin: 0 auto;           /* 0px → 0 */
-  font-size: rem(24);
-}
-
-.button {
-  height: rem(48);
-  padding: rem(12) rem(24);
-  border-radius: rem(8);
-}
-```
-
-### Mit Direct Conversion
-```json
-{ "pxToRem.directConversion": true }
-```
-```css
-.hero {
-  width: 75rem;            /* 1200 / 16 */
-  padding: 2.5rem 5rem;
-  font-size: 1.5rem;       /* 24 / 16 */
-}
-```
-
-### Mit SCSS Interpolation
-```json
-{ "pxToRem.scssInterpolation": true }
-```
-```scss
-.hero {
-  width: calc(100% - #{rem(40)});    /* Auto-Wrapped in calc() */
-  padding: clamp(#{rem(16)}, 2vw, #{rem(32)});
-}
-```
-
----
-
-## Zusätzliche Features
-
-### Inlay Hints
-Permanenter grauer Text zeigt px-Werte neben rem:
-
-```css
-.container {
-  font-size: 2rem → 32px;
-  padding: 1.5rem → 24px;
-  margin: rem(20) → 20px;
-}
-```
-
-**Verwendung:**
-- Standardmäßig aktiviert
-- Wird automatisch in CSS/SCSS Dateien angezeigt
-- Hover für zusätzliche Infos
-- Deaktivieren: `"pxToRem.enableInlayHints": false`
-
-### Dynamische Base Font Size
-BaseFontSize aus deinen SCSS/CSS Variablen auslesen:
-
-**variables.scss:**
-```scss
-$base-font-size: 20;  // oder 20px
-```
-
-**settings.json:**
-```json
-{
-  "pxToRem.useDynamicBaseFontSize": true,
-  "pxToRem.baseFontSizeFile": "src/styles/variables.scss",
-  "pxToRem.baseFontSizeVariable": "$base-font-size"
-}
-```
-
-**Ergebnis:**
-```css
-font-size: 2rem → 40px  /* 2 * 20 */
-```
-
-**Vorteile:**
-- ✅ Single Source of Truth
-- ✅ Team-Sync über Git
-- ✅ Live-Updates bei Datei-Änderung
-- ✅ Funktioniert mit oder ohne px-Einheit
-
----
-
-## 🎮 Workflows
-
-### Methode 1: Tastenkürzel (Schnellste)
-```
-Datei öffnen → Strg+K → Fertig!
-```
-
-### Methode 2: Code Lens (Visuell)
-```css
-$(symbol-property) 3 px-Werte zu rem konvertieren  ← Klicken!
-font-size: 16px;
-padding: 20px;
-```
-*Erscheint über Zeilen mit px-Werten*
-
-### Methode 3: Quick Fix (Optionen)
-```css
-font-size: 16px;  💡 ← Strg+. drücken
-```
-Wähle aus:
-- Konvertieren zu `1rem`
-- Konvertieren zu `rem(16)`
-- Konvertieren zu `rem(16px)`
-
-### Methode 4: Command Palette (Erweitert)
-```
-Strg+Shift+P → "PX zu REM" eingeben
-```
-- Gesamte Datei konvertieren
-- Selektion konvertieren
-- Workspace konvertieren
-- Nach Dateityp konvertieren
-- Rückwärts konvertieren
-- Einstellungen exportieren/importieren
-
----
-
-## 🚀 Erweiterte Features
-
-### 1. Datei-Ignoring
-**Problem:** Vendor-Dateien und minifizierte Dateien werden konvertiert  
-**Lösung:** Ignoriere sie!
-
-```json
-{
-  "pxToRem.excludeFiles": [
-    "**/*.min.css",       // Alle minifizierten
-    "**/vendor/**",       // Third-party
-    "**/legacy/**"        // Alter Code
-  ]
-}
-```
-
-Dann **"Alle Dateien im Workspace konvertieren"** ausführen → Nur deine Dateien werden konvertiert! ✅
-
----
-
-### 2. Dateityp-Auswahl
-**Problem:** Möchte nur SCSS konvertieren, nicht CSS  
-**Lösung:** Typ-spezifische Konvertierung!
-
-```
-Strg+Shift+P → "PX zu REM: Alle Dateien eines bestimmten Types"
-→ Wähle: SCSS
-→ Nur .scss Dateien werden konvertiert!
-```
-
-Oder Standard-Typen konfigurieren:
-```json
-{
-  "pxToRem.fileTypes": ["scss", "sass"]  // Nur SCSS & Sass
-}
-```
-
----
-
-### 3. Selektive Properties
-**Beispiel:** Borders in px behalten, alles andere konvertieren
-
-```json
-{
-  "pxToRem.excludeProperties": [
-    "border-width",
-    "outline-width",
-    "stroke-width"
-  ]
-}
-```
-
-```css
-/* Vorher */
-.box {
-  width: 200px;           /* ✅ Wird konvertiert */
-  border-width: 2px;      /* ❌ Wird NICHT konvertiert */
-  padding: 20px;          /* ✅ Wird konvertiert */
-}
-
-/* Nachher */
-.box {
-  width: rem(200);
-  border-width: 2px;      /* Bleibt px! */
-  padding: rem(20);
-}
-```
-
----
-
-### 4. Min/Max Bereich
-**Beispiel:** Nur Werte ab 8px konvertieren
-
-```json
-{
-  "pxToRem.minValue": 8
-}
-```
-
-```css
-/* Vorher */
-.box {
-  width: 200px;        /* ✅ Konvertiert (>= 8) */
-  border: 2px solid;   /* ❌ Bleibt (< 8) */
-  padding: 16px;       /* ✅ Konvertiert (>= 8) */
-}
-
-/* Nachher */
-.box {
-  width: rem(200);
-  border: 2px solid;   /* Erhalten! */
-  padding: rem(16);
-}
-```
-
----
-
-### 5. Konfigurations-Profile
-Schnell-Wechsel zwischen 4 Presets:
-
-```
-Strg+Shift+P → "PX zu REM: Profil wechseln"
-```
-
-**Verfügbare Profile:**
-1. **🎨 SCSS Funktion** - `rem(16)` mit SCSS Interpolation
-2. **📐 Direct Conversion** - `1rem` direkte Umrechnung
-3. **🔧 SCSS mit px** - `rem(16px)` Format
-4. **⚡ Minimal** - Nur große Werte (≥8px), ohne Borders
-
----
-
-### 6. Team-Einstellungen
-**Config mit deinem Team teilen:**
-
-```
-Strg+Shift+P → "PX zu REM: Einstellungen exportieren"
-→ Speichere als px-to-rem-config.json
-→ In Git committen
-```
-
-**Team-Mitglieder:**
-```
-Öffne px-to-rem-config.json
-→ Strg+Shift+P → "PX zu REM: Einstellungen importieren"
-→ Alle haben die gleiche Config! ✅
-```
-
----
-
-## 💡 Anwendungsfälle
-
-### Großes Projekt mit Vendor-Code
-```json
-{
-  "pxToRem.excludeFiles": ["**/vendor/**", "**/*.min.*"]
-}
-```
-**Ergebnis:** Nur dein Code wird konvertiert, Vendor bleibt unberührt
-
-### Schrittweise Migration
-```
-Woche 1: Alle SCSS Dateien konvertieren
-Woche 2: Review & Test
-Woche 3: Alle CSS Dateien konvertieren
-```
-**Ergebnis:** Sichere, kontrollierte Migration
-
-### Design System Regeln
-```json
-{
-  "pxToRem.minValue": 4,
-  "pxToRem.excludeProperties": ["border-width", "outline-width"]
-}
-```
-**Ergebnis:** Borders bleiben px, Spacing wird zu rem
-
-### Internationales Team
-- 🇩🇪 Deutscher Entwickler → Deutsche UI
-- 🇬🇧 Englischer Entwickler → Englische UI
-- Extension erkennt VSCode-Sprache automatisch!
-
----
-
-## 🌍 Mehrsprachige Unterstützung
-
-### Automatische Sprach-Erkennung
-Extension nutzt automatisch deine VSCode-Sprache!
-
-**Englische UI:**
-```
-✅ 23 px values converted to rem(N)!
-No active editor found!
-```
-
-**Deutsche UI:**
-```
-✅ 23 px-Werte in rem(N) konvertiert!
-Kein aktiver Editor gefunden!
-```
-
-### Deine Sprache hinzufügen
-Möchtest du eine Übersetzung beitragen?
-1. Erstelle `/src/locales/[code].json`
-2. Kopiere Struktur von `en.json`
-3. Übersetze alle Strings
-4. Pull Request einreichen!
-
-**Benötigte Sprachen:** Französisch, Spanisch, Italienisch, Japanisch, Chinesisch, etc.
-
----
-
-## 🔧 Anpassung
-
-### Tastenkürzel ändern
-
-**Standard-Shortcuts gefallen nicht?** Passe sie an:
-
-1. Öffne Tastenkürzel: `Strg+K Strg+S`
-2. Suche nach: `px-to-rem`
-3. Klicke auf Stift-Icon zum Ändern
-
-**Beispiel für eigene Shortcuts:**
-```json
-{
-  "key": "ctrl+alt+r",
-  "command": "px-to-rem.convert"
-},
-{
-  "key": "ctrl+alt+p",
-  "command": "px-to-rem.convertWithPx"
-}
-```
-
-### Code Lens umschalten
-
-**Code Lens Buttons zu aufdringlich?**
-```json
-{
-  "pxToRem.enableCodeLens": false
-}
-```
-
-### Diagnostics aktivieren
-
-**Möchtest du px-Werte als Warnungen unterstrichen?**
-```json
-{
-  "pxToRem.enableDiagnostics": true,
-  "pxToRem.diagnosticSeverity": "warning"  // oder "error", "information", "hint"
-}
-```
-
----
-
-## 🎯 Tipps & Tricks
-
-### Tipp 1: Quick Fix zum Testen nutzen
-Verschiedene Formate vor dem Committen ausprobieren:
-```css
-font-size: 16px;  💡 Strg+.
-→ "1rem" probieren
-→ Rückgängig (Strg+Z)
-→ "rem(16)" stattdessen probieren
-```
-
-### Tipp 2: Selektion für Teiländerungen konvertieren
-```
-1. Bestimmte Zeilen selektieren
-2. Strg+Shift+K
-3. Nur Selektion wird konvertiert!
-```
-
-### Tipp 3: Rückwärts-Konvertierung zum Debuggen
-```
-Strg+Shift+P → "Rückwärts konvertieren"
-→ Alle rem() zurück zu px
-→ Perfekt zum Debuggen!
-```
-
-### Tipp 4: Status Bar Schnellzugriff
-Klicke auf **📏 42 px** in der Status Bar → Konvertiert Datei sofort!
-
-### Tipp 5: Workspace-Konvertierung vor Merge
-```
-1. Git Commit aktueller Stand
-2. Workspace konvertieren
-3. Review mit Git Diff
-4. Committen oder zurücksetzen
-```
-
----
-
-## 🤝 Mitwirken
-
-### Bug gefunden?
-- [Auf GitHub melden](https://github.com/your-username/px-to-rem-converter/issues)
-- Oder Review auf [Marketplace](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function) hinterlassen
-
-### Feature-Wunsch?
-- GitHub Issue öffnen
-- Oder für bestehende Anfragen voten
-
-### Übersetzung hinzufügen?
-1. Repository forken
-2. `/src/locales/[sprache].json` erstellen
-3. Alle Strings übersetzen
-4. Pull Request!
-
-Wir brauchen: **Französisch, Spanisch, Italienisch, Japanisch, Chinesisch, Koreanisch, Russisch, Portugiesisch, Niederländisch, Polnisch**
-
----
-
-## 📊 Extension-Statistiken
-
-- **21 Features Gesamt**
-- **2 Sprachen** (Deutsch + Englisch)
-- **1100+ Zeilen** TypeScript
-- **Production-Ready**
-- **Enterprise-Grade**
-- **Regelmäßige Updates**
-
----
-
-## ⭐ Warum diese Extension?
-
-✅ **Am Vollständigsten** - 21 Features vs. 3-5 bei anderen Extensions  
-✅ **Enterprise-Ready** - Datei-Ignoring, Typ-Auswahl, Team-Einstellungen  
-✅ **International** - Mehrsprachige Unterstützung  
-✅ **Gut Dokumentiert** - Umfassende Guides  
-✅ **Aktive Entwicklung** - Regelmäßige Updates & Bug-Fixes  
-✅ **Kostenlos & Open Source** - MIT Lizenz  
-
----
-
-## 📝 FAQ
-
-<details>
-<summary><strong>Kann ich das mit Tailwind CSS nutzen?</strong></summary>
-
-Ja! Aber Vorsicht - Tailwind nutzt px-Werte in Utilities. Erwäge:
-```json
-{
-  "pxToRem.excludeFiles": ["**/tailwind.config.js", "**/utilities/**"]
-}
-```
+Ein 1px-Rahmen, der beim Vergrößern der Schrift auf 2px wächst, sieht kaputt aus und verbessert die Lesbarkeit nicht. Media Queries sind ein Sonderfall: Dort bedeuten rem und em beide die Browser-Standardgröße (16px), egal was `html { font-size }` sagt – ein mit 10px-Root umgewandelter Breakpoint würde sich also unbemerkt verschieben. Der Smart-Modus verwendet deshalb em relativ zur Browser-Standardgröße. Beides lässt sich ändern.
 </details>
 
 <details>
-<summary><strong>Funktioniert es mit CSS-in-JS?</strong></summary>
+<summary>Mein Build nutzt schon postcss-pxtorem. Brauche ich das?</summary>
 
-Ja, für styled-components, emotion, etc. Unterstützt `.jsx` und `.tsx` Dateien.
+Die Erweiterung liest den `rootValue` des Plugins, damit Editor und Build übereinstimmen, und die Statusleiste weist darauf hin, dass zusätzlich beim Build umgewandelt wird. Viele Teams wandeln trotzdem im Quelltext um, damit Code-Reviews, Design Tokens und Hovers die echten Einheiten zeigen.
 </details>
 
 <details>
-<summary><strong>Werden Werte in Kommentaren konvertiert?</strong></summary>
+<summary>Funktioniert das ohne installierte Sass-, Vue- oder Svelte-Erweiterung?</summary>
 
-Nein, Kommentare werden automatisch ignoriert.
+Ja. Dateien werden über ihre Endung erkannt, wenn VS Code keine Sprache für sie kennt.
 </details>
 
-<details>
-<summary><strong>Kann ich eine Konvertierung rückgängig machen?</strong></summary>
+## Mitmachen
 
-Ja! Nutze `Strg+Z` oder den "Rückwärts konvertieren" Command.
-</details>
+Issues und Pull Requests sind auf [GitHub](https://github.com/louis-mudrack/px-to-rem) willkommen. `npm ci && npm run check` führt Typprüfung, Lint, Unit-Tests und Build aus; `npm run test:integration` startet die Erweiterung in VS Code. Die Architektur ist in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) beschrieben. Übersetzungen liegen in `l10n/` und `package.nls.*.json` – Korrekturen von Muttersprachlern sind sehr willkommen.
 
-<details>
-<summary><strong>Behandelt es calc() korrekt?</strong></summary>
+## Lizenz
 
-Ja, mit aktivierter SCSS Interpolation: `calc(100% - #{rem(20)})`
-</details>
-
----
-
-## 📞 Support
-
-- **GitHub**: [Issues & Discussions](https://github.com/your-username/px-to-rem-converter)
-- **Marketplace**: [Reviews & Fragen](https://marketplace.visualstudio.com/items?itemName=LouisMudrack.px-to-rem-function)
-- **E-Mail**: support@example.com
-
----
-
-## 📜 Lizenz
-
-MIT Lizenz - Kostenlos für private und kommerzielle Nutzung
-
----
-
-## 🎉 Credits
-
-Erstellt mit ❤️ von [Dein Name]  
-**Made in Germany** 🇩🇪 | **Für die Welt** 🌍
-
----
-
-**[⬆ Zurück nach oben](#px-zu-rem-konverter)**
+[MIT](LICENSE.md)

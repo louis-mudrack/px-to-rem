@@ -1,0 +1,140 @@
+import * as vscode from 'vscode';
+import type { ProjectContext } from '../core/context';
+import { parseDocument, type ParsedDocument } from '../core/document';
+import type { Options } from '../core/options';
+import { hostForLanguage, languageForFileName } from '../core/syntax';
+import type { ConfigService } from './config';
+import type { ProjectService } from './project';
+import type { WorkspaceIndex } from './workspaceIndex';
+
+/** Everything a provider needs for one document. */
+export interface DocState {
+    document: vscode.TextDocument;
+    doc: ParsedDocument;
+    options: Options;
+    ctx: ProjectContext;
+}
+
+interface CacheEntry {
+    version: number;
+    key: string;
+    doc: ParsedDocument;
+}
+
+/**
+ * Views of content that is not the user's to edit (logs, old git revisions,
+ * diff inputs). Everything else works, including web file systems
+ * (vscode-vfs, tmp, memfs, …) whose schemes we cannot enumerate.
+ */
+const IGNORED_SCHEMES = new Set(['output', 'debug', 'git', 'gitfs', 'vscode-scm', 'gitlens', 'review', 'pr', 'conflictResolution', 'merge-conflict.conflict-diff', 'vscode-settings']);
+
+/** Shared access to parsed documents, options and project context. */
+export class Engine implements vscode.Disposable {
+    private readonly cache = new Map<string, CacheEntry>();
+    private readonly emitter = new vscode.EventEmitter<void>();
+    private readonly disposables: vscode.Disposable[] = [];
+    /** Fires when settings or project facts change and everything should refresh. */
+    readonly onDidChange = this.emitter.event;
+
+    constructor(
+        readonly config: ConfigService,
+        readonly project: ProjectService,
+        readonly index: WorkspaceIndex,
+    ) {
+        this.disposables.push(
+            project.onDidChange(() => {
+                this.cache.clear();
+                this.emitter.fire();
+            }),
+            vscode.workspace.onDidCloseTextDocument(d => this.cache.delete(d.uri.toString())),
+        );
+    }
+
+    /**
+     * The language the engine treats a document as. VS Code has no built-in
+     * Sass (indented), Stylus, Vue, Svelte or Astro language, so without those
+     * extensions such files are plain text; fall back to the file extension.
+     */
+    languageId(document: vscode.TextDocument): string {
+        if (hostForLanguage(document.languageId)) {
+            return document.languageId;
+        }
+        return languageForFileName(document.uri.path) ?? document.languageId;
+    }
+
+    options(document: vscode.TextDocument): Options {
+        return this.config.optionsFor(document.uri, this.languageId(document));
+    }
+
+    /** Whether the extension works in this document at all. */
+    isSupported(document: vscode.TextDocument): boolean {
+        const languageId = this.languageId(document);
+        if (IGNORED_SCHEMES.has(document.uri.scheme) || !hostForLanguage(languageId)) {
+            return false;
+        }
+        const options = this.options(document);
+        if (!options.languages.includes(languageId)) {
+            return false;
+        }
+        if (document.uri.scheme !== 'untitled') {
+            const folder = vscode.workspace.getWorkspaceFolder(document.uri);
+            if (folder && this.index.isIgnored(document.uri, folder, options)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Whether live features (diagnostics, hints, lenses) should run: supported and not too large. */
+    isLive(document: vscode.TextDocument): boolean {
+        return this.isSupported(document) && document.getText().length <= this.options(document).maxFileSize;
+    }
+
+    state(document: vscode.TextDocument): DocState {
+        const options = this.options(document);
+        const ctx = this.project.contextFor(document.uri);
+        const parseOptions = {
+            tailwind: !!ctx.tailwind,
+            jsObjects: options.js.objectStyles && !ctx.reactNative,
+            jsUnitlessNumbers: options.js.unitlessNumbers && !ctx.reactNative,
+            jsTemplates: options.js.templateLiterals,
+        };
+        const languageId = this.languageId(document);
+        const key = JSON.stringify(parseOptions) + languageId;
+        const uri = document.uri.toString();
+        const cached = this.cache.get(uri);
+        let doc: ParsedDocument;
+        if (cached && cached.version === document.version && cached.key === key) {
+            doc = cached.doc;
+        } else {
+            doc = parseDocument(document.getText(), languageId, parseOptions);
+            this.cache.set(uri, { version: document.version, key, doc });
+        }
+        return { document, doc, options, ctx };
+    }
+
+    /** Parses text that is not an open document (workspace operations, paste). */
+    parseText(text: string, languageId: string, uri: vscode.Uri | undefined): { doc: ParsedDocument; options: Options; ctx: ProjectContext } {
+        const options = this.config.optionsFor(uri, languageId);
+        const ctx = this.project.contextFor(uri);
+        const doc = parseDocument(text, languageId, {
+            tailwind: !!ctx.tailwind,
+            jsObjects: options.js.objectStyles && !ctx.reactNative,
+            jsUnitlessNumbers: options.js.unitlessNumbers && !ctx.reactNative,
+            jsTemplates: options.js.templateLiterals,
+        });
+        return { doc, options, ctx };
+    }
+
+    dispose(): void {
+        this.emitter.dispose();
+        for (const d of this.disposables) {
+            d.dispose();
+        }
+    }
+}
+
+/** Converts core offsets to a VS Code range. */
+export function toRange(document: vscode.TextDocument, start: number, end: number): vscode.Range {
+    return new vscode.Range(document.positionAt(start), document.positionAt(end));
+}

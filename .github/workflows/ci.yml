@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Generated files are up to date
+        run: npm run check:generated
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  integration:
+    name: VS Code integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Cache VS Code
+        uses: actions/cache@v4
+        with:
+          path: .vscode-test
+          key: vscode-1.97.2
+      - run: xvfb-run -a npm run test:integration
+
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    needs: [test, integration]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vsce package --out px-to-rem-toolkit.vsix
+      - run: npm pack ./cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            px-to-rem-toolkit.vsix
+            px-to-rem-toolkit-*.tgz
