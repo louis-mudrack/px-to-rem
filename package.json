@@ -44,6 +44,1309 @@
   "main": "./dist/extension.js",
   "browser": "./dist/web/extension.js",
   "l10n": "./l10n",
+  "activationEvents": [
+    "onLanguage:css",
+    "onLanguage:postcss",
+    "onLanguage:tailwindcss",
+    "onLanguage:scss",
+    "onLanguage:sass",
+    "onLanguage:less",
+    "onLanguage:stylus",
+    "onLanguage:html",
+    "onLanguage:vue",
+    "onLanguage:svelte",
+    "onLanguage:astro",
+    "onLanguage:php",
+    "onLanguage:blade",
+    "onLanguage:twig",
+    "onLanguage:handlebars",
+    "onLanguage:erb",
+    "onLanguage:razor",
+    "onLanguage:liquid",
+    "onLanguage:mdx",
+    "onLanguage:javascript",
+    "onLanguage:typescript",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact",
+    "workspaceContains:**/.pxtoremrc.json",
+    "workspaceContains:**/.pxtoremrc",
+    "workspaceContains:**/pxtorem.config.json"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "px-to-rem.convert",
+        "title": "%command.convert%",
+        "category": "PX to REM",
+        "icon": "$(symbol-ruler)"
+      },
+      {
+        "command": "px-to-rem.convertSelection",
+        "title": "%command.convertSelection%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.convertWithPx",
+        "title": "%command.convertWithPx%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.convertChanged",
+        "title": "%command.convertChanged%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.reverseConvert",
+        "title": "%command.reverseConvert%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.cycleUnit",
+        "title": "%command.cycleUnit%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.stepUp",
+        "title": "%command.stepUp%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.stepDown",
+        "title": "%command.stepDown%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.makeFluid",
+        "title": "%command.makeFluid%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.explainKept",
+        "title": "%command.explainKept%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.convertWorkspace",
+        "title": "%command.convertWorkspace%",
+        "category": "PX to REM",
+        "icon": "$(files)"
+      },
+      {
+        "command": "px-to-rem.convertFileType",
+        "title": "%command.convertFileType%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.convertFolder",
+        "title": "%command.convertFolder%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.convertChangedFiles",
+        "title": "%command.convertChangedFiles%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.rebase",
+        "title": "%command.rebase%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.openDashboard",
+        "title": "%command.openDashboard%",
+        "category": "PX to REM",
+        "icon": "$(dashboard)"
+      },
+      {
+        "command": "px-to-rem.generateTokens",
+        "title": "%command.generateTokens%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.generateHelper",
+        "title": "%command.generateHelper%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.setup",
+        "title": "%command.setup%",
+        "category": "PX to REM",
+        "icon": "$(rocket)"
+      },
+      {
+        "command": "px-to-rem.switchProfile",
+        "title": "%command.switchProfile%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.exportSettings",
+        "title": "%command.exportSettings%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.importSettings",
+        "title": "%command.importSettings%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.toggleInlayHints",
+        "title": "%command.toggleInlayHints%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.refresh",
+        "title": "%command.refresh%",
+        "category": "PX to REM",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "px-to-rem.menu",
+        "title": "%command.menu%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.migration.refresh",
+        "title": "%command.migration.refresh%",
+        "category": "PX to REM",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "px-to-rem.migration.convertFile",
+        "title": "%command.migration.convertFile%",
+        "category": "PX to REM",
+        "icon": "$(symbol-ruler)"
+      },
+      {
+        "command": "px-to-rem.convertRange",
+        "title": "%command.convertRange%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.convertLine",
+        "title": "%command.convertLine%",
+        "category": "PX to REM"
+      },
+      {
+        "command": "px-to-rem.setFormat",
+        "title": "%command.setFormat%",
+        "category": "PX to REM"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "pxToRem.editorMenu",
+        "label": "%submenu.editor%"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "px-to-rem.convertRange",
+          "when": "false"
+        },
+        {
+          "command": "px-to-rem.convertLine",
+          "when": "false"
+        },
+        {
+          "command": "px-to-rem.setFormat",
+          "when": "false"
+        },
+        {
+          "command": "px-to-rem.migration.convertFile",
+          "when": "false"
+        },
+        {
+          "command": "px-to-rem.migration.refresh",
+          "when": "false"
+        },
+        {
+          "command": "px-to-rem.convertSelection",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.convertWithPx",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.convertChanged",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.reverseConvert",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.cycleUnit",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.stepUp",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.stepDown",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.makeFluid",
+          "when": "pxToRem.active"
+        },
+        {
+          "command": "px-to-rem.explainKept",
+          "when": "pxToRem.active"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "pxToRem.editorMenu",
+          "group": "1_modification@90",
+          "when": "pxToRem.active"
+        }
+      ],
+      "pxToRem.editorMenu": [
+        {
+          "command": "px-to-rem.convert",
+          "group": "1_convert@1"
+        },
+        {
+          "command": "px-to-rem.cycleUnit",
+          "group": "1_convert@2"
+        },
+        {
+          "command": "px-to-rem.makeFluid",
+          "group": "1_convert@3"
+        },
+        {
+          "command": "px-to-rem.reverseConvert",
+          "group": "1_convert@4"
+        },
+        {
+          "command": "px-to-rem.convertChanged",
+          "group": "2_scope@1"
+        },
+        {
+          "command": "px-to-rem.explainKept",
+          "group": "3_info@1"
+        },
+        {
+          "command": "px-to-rem.openDashboard",
+          "group": "3_info@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "px-to-rem.convertFolder",
+          "group": "7_modification@90",
+          "when": "explorerResourceIsFolder || resourceExtname =~ /\\.(css|scss|sass|less|styl|pcss|vue|svelte|astro|html|jsx|tsx)$/"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "px-to-rem.migration.refresh",
+          "when": "view == pxToRem.migration",
+          "group": "navigation@1"
+        },
+        {
+          "command": "px-to-rem.openDashboard",
+          "when": "view == pxToRem.migration",
+          "group": "navigation@2"
+        },
+        {
+          "command": "px-to-rem.convertWorkspace",
+          "when": "view == pxToRem.migration",
+          "group": "navigation@3"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "px-to-rem.migration.convertFile",
+          "when": "view == pxToRem.migration && viewItem == pxToRemFile",
+          "group": "inline"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "px-to-rem.convert",
+        "key": "ctrl+alt+r",
+        "mac": "ctrl+cmd+r",
+        "when": "editorTextFocus && pxToRem.active"
+      },
+      {
+        "command": "px-to-rem.cycleUnit",
+        "key": "ctrl+alt+u",
+        "mac": "ctrl+cmd+u",
+        "when": "editorTextFocus && pxToRem.active"
+      },
+      {
+        "command": "px-to-rem.stepUp",
+        "key": "shift+alt+pageup",
+        "when": "editorTextFocus && pxToRem.active"
+      },
+      {
+        "command": "px-to-rem.stepDown",
+        "key": "shift+alt+pagedown",
+        "when": "editorTextFocus && pxToRem.active"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "pxToRem.migration",
+          "name": "%view.migration%",
+          "visibility": "collapsed",
+          "icon": "$(symbol-ruler)",
+          "contextualTitle": "PX to REM"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "pxToRem.migration",
+        "contents": "%view.migration.welcome%"
+      }
+    ],
+    "jsonValidation": [
+      {
+        "fileMatch": [
+          ".pxtoremrc",
+          ".pxtoremrc.json",
+          "pxtorem.config.json"
+        ],
+        "url": "./schemas/pxtoremrc.schema.json"
+      }
+    ],
+    "languages": [
+      {
+        "id": "jsonc",
+        "filenames": [
+          ".pxtoremrc",
+          ".pxtoremrc.json"
+        ]
+      }
+    ],
+    "walkthroughs": [
+      {
+        "id": "pxToRem.welcome",
+        "title": "%walkthrough.title%",
+        "description": "%walkthrough.description%",
+        "steps": [
+          {
+            "id": "setup",
+            "title": "%walkthrough.setup.title%",
+            "description": "%walkthrough.setup.description%",
+            "media": {
+              "markdown": "walkthrough/setup.md"
+            },
+            "completionEvents": [
+              "onCommand:px-to-rem.setup"
+            ]
+          },
+          {
+            "id": "convert",
+            "title": "%walkthrough.convert.title%",
+            "description": "%walkthrough.convert.description%",
+            "media": {
+              "markdown": "walkthrough/convert.md"
+            },
+            "completionEvents": [
+              "onCommand:px-to-rem.convert"
+            ]
+          },
+          {
+            "id": "smart",
+            "title": "%walkthrough.smart.title%",
+            "description": "%walkthrough.smart.description%",
+            "media": {
+              "markdown": "walkthrough/smart.md"
+            }
+          },
+          {
+            "id": "save",
+            "title": "%walkthrough.save.title%",
+            "description": "%walkthrough.save.description%",
+            "media": {
+              "markdown": "walkthrough/save.md"
+            },
+            "completionEvents": [
+              "onCommand:workbench.action.openSettings"
+            ]
+          },
+          {
+            "id": "dashboard",
+            "title": "%walkthrough.dashboard.title%",
+            "description": "%walkthrough.dashboard.description%",
+            "media": {
+              "markdown": "walkthrough/dashboard.md"
+            },
+            "completionEvents": [
+              "onCommand:px-to-rem.openDashboard"
+            ]
+          },
+          {
+            "id": "cli",
+            "title": "%walkthrough.cli.title%",
+            "description": "%walkthrough.cli.description%",
+            "media": {
+              "markdown": "walkthrough/cli.md"
+            }
+          }
+        ]
+      }
+    ],
+    "configuration": [
+      {
+        "id": "pxToRem.conversion",
+        "title": "%config.title.conversion%",
+        "properties": {
+          "pxToRem.format": {
+            "type": "string",
+            "default": "auto",
+            "markdownDescription": "%config.format%",
+            "scope": "language-overridable",
+            "order": 0
+          },
+          "pxToRem.functionName": {
+            "type": "string",
+            "default": "rem",
+            "markdownDescription": "%config.functionName%",
+            "scope": "resource",
+            "order": 1
+          },
+          "pxToRem.mode": {
+            "type": "string",
+            "default": "smart",
+            "markdownDescription": "%config.mode%",
+            "enum": [
+              "smart",
+              "simple"
+            ],
+            "enumDescriptions": [
+              "%config.mode.smart%",
+              "%config.mode.simple%"
+            ],
+            "scope": "resource",
+            "order": 2
+          },
+          "pxToRem.baseFontSize": {
+            "type": "number",
+            "default": 16,
+            "markdownDescription": "%config.baseFontSize%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 3
+          },
+          "pxToRem.baseFontSizeDetection": {
+            "type": "string",
+            "default": "auto",
+            "markdownDescription": "%config.baseFontSizeDetection%",
+            "enum": [
+              "auto",
+              "off"
+            ],
+            "enumDescriptions": [
+              "%config.baseFontSizeDetection.auto%",
+              "%config.baseFontSizeDetection.off%"
+            ],
+            "scope": "resource",
+            "order": 4
+          },
+          "pxToRem.precision": {
+            "type": "number",
+            "default": 4,
+            "markdownDescription": "%config.precision%",
+            "minimum": 0,
+            "maximum": 10,
+            "scope": "resource",
+            "order": 5
+          },
+          "pxToRem.leadingZero": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.leadingZero%",
+            "scope": "resource",
+            "order": 6
+          },
+          "pxToRem.preserveZero": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.preserveZero%",
+            "scope": "resource",
+            "order": 7
+          },
+          "pxToRem.designWidth": {
+            "type": "number",
+            "default": 1440,
+            "markdownDescription": "%config.designWidth%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 8
+          },
+          "pxToRem.designHeight": {
+            "type": "number",
+            "default": 900,
+            "markdownDescription": "%config.designHeight%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 9
+          },
+          "pxToRem.reverseUnits": {
+            "type": "array",
+            "default": [
+              "rem",
+              "function"
+            ],
+            "markdownDescription": "%config.reverseUnits%",
+            "items": {
+              "type": "string",
+              "enum": [
+                "rem",
+                "em",
+                "vw",
+                "vh",
+                "vmin",
+                "vmax",
+                "rpx",
+                "pt",
+                "function"
+              ]
+            },
+            "scope": "resource",
+            "order": 10
+          }
+        }
+      },
+      {
+        "id": "pxToRem.smart",
+        "title": "%config.title.smart%",
+        "properties": {
+          "pxToRem.minValue": {
+            "type": "number",
+            "default": 0,
+            "markdownDescription": "%config.minValue%",
+            "minimum": 0,
+            "scope": "resource",
+            "order": 11
+          },
+          "pxToRem.maxValue": {
+            "type": "number",
+            "default": 9999,
+            "markdownDescription": "%config.maxValue%",
+            "minimum": 0,
+            "scope": "resource",
+            "order": 12
+          },
+          "pxToRem.includeProperties": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "%config.includeProperties%",
+            "items": {
+              "type": "string"
+            },
+            "scope": "resource",
+            "order": 13
+          },
+          "pxToRem.excludeProperties": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "%config.excludeProperties%",
+            "items": {
+              "type": "string"
+            },
+            "scope": "resource",
+            "order": 14
+          },
+          "pxToRem.excludePatterns": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "%config.excludePatterns%",
+            "items": {
+              "type": "string"
+            },
+            "scope": "resource",
+            "order": 15
+          },
+          "pxToRem.ignoreUppercasePx": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.ignoreUppercasePx%",
+            "scope": "resource",
+            "order": 16
+          },
+          "pxToRem.mediaQueries": {
+            "type": "string",
+            "default": "em",
+            "markdownDescription": "%config.mediaQueries%",
+            "enum": [
+              "em",
+              "rem",
+              "keep",
+              "convert"
+            ],
+            "enumDescriptions": [
+              "%config.mediaQueries.em%",
+              "%config.mediaQueries.rem%",
+              "%config.mediaQueries.keep%",
+              "%config.mediaQueries.convert%"
+            ],
+            "scope": "resource",
+            "order": 17
+          },
+          "pxToRem.mediaQueryBase": {
+            "type": "number",
+            "default": 16,
+            "markdownDescription": "%config.mediaQueryBase%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 18
+          },
+          "pxToRem.interpolateInCalc": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%config.interpolateInCalc%",
+            "scope": "resource",
+            "order": 19
+          },
+          "pxToRem.convertVariables": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.convertVariables%",
+            "scope": "resource",
+            "order": 20
+          },
+          "pxToRem.convertMixinArguments": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.convertMixinArguments%",
+            "scope": "resource",
+            "order": 21
+          },
+          "pxToRem.smartRules": {
+            "type": "object",
+            "default": {},
+            "markdownDescription": "%config.smartRules%",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "convert",
+                "rem",
+                "em",
+                "unitless",
+                "keep"
+              ]
+            },
+            "scope": "resource",
+            "order": 22
+          },
+          "pxToRem.hairline": {
+            "type": "number",
+            "default": 1,
+            "markdownDescription": "%config.hairline%",
+            "minimum": 0,
+            "scope": "resource",
+            "order": 23
+          }
+        }
+      },
+      {
+        "id": "pxToRem.fluid",
+        "title": "%config.title.fluid%",
+        "properties": {
+          "pxToRem.fluid.minViewport": {
+            "type": "number",
+            "default": 375,
+            "markdownDescription": "%config.fluid.minViewport%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 24
+          },
+          "pxToRem.fluid.maxViewport": {
+            "type": "number",
+            "default": 1440,
+            "markdownDescription": "%config.fluid.maxViewport%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 25
+          },
+          "pxToRem.fluid.breakpoints": {
+            "type": "array",
+            "default": [
+              320,
+              375,
+              768,
+              1024,
+              1280,
+              1440,
+              1920
+            ],
+            "markdownDescription": "%config.fluid.breakpoints%",
+            "items": {
+              "type": "number"
+            },
+            "scope": "resource",
+            "order": 26
+          },
+          "pxToRem.fluid.unit": {
+            "type": "string",
+            "default": "vw",
+            "markdownDescription": "%config.fluid.unit%",
+            "enum": [
+              "vw",
+              "cqi"
+            ],
+            "enumDescriptions": [
+              "%config.fluid.unit.vw%",
+              "%config.fluid.unit.cqi%"
+            ],
+            "scope": "resource",
+            "order": 27
+          },
+          "pxToRem.fluid.checkZoom": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.fluid.checkZoom%",
+            "scope": "resource",
+            "order": 28
+          }
+        }
+      },
+      {
+        "id": "pxToRem.tokens",
+        "title": "%config.title.tokens%",
+        "properties": {
+          "pxToRem.tokens.enable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.tokens.enable%",
+            "scope": "resource",
+            "order": 29
+          },
+          "pxToRem.tokens.sources": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "%config.tokens.sources%",
+            "items": {
+              "type": "string"
+            },
+            "scope": "resource",
+            "order": 30
+          },
+          "pxToRem.tokens.autoDetect": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.tokens.autoDetect%",
+            "scope": "resource",
+            "order": 31
+          },
+          "pxToRem.tokens.preferTokens": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%config.tokens.preferTokens%",
+            "scope": "resource",
+            "order": 32
+          },
+          "pxToRem.tokens.reference": {
+            "type": "string",
+            "default": "var(--{name})",
+            "markdownDescription": "%config.tokens.reference%",
+            "scope": "resource",
+            "order": 33
+          },
+          "pxToRem.tokens.colors": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.tokens.colors%",
+            "scope": "resource",
+            "order": 34
+          },
+          "pxToRem.tokens.colorTolerance": {
+            "type": "number",
+            "default": 3,
+            "markdownDescription": "%config.tokens.colorTolerance%",
+            "minimum": 0,
+            "scope": "resource",
+            "order": 35
+          }
+        }
+      },
+      {
+        "id": "pxToRem.frameworks",
+        "title": "%config.title.frameworks%",
+        "properties": {
+          "pxToRem.tailwind.enable": {
+            "type": "string",
+            "default": "auto",
+            "markdownDescription": "%config.tailwind.enable%",
+            "enum": [
+              "auto",
+              "on",
+              "off"
+            ],
+            "enumDescriptions": [
+              "%config.tailwind.enable.auto%",
+              "%config.tailwind.enable.on%",
+              "%config.tailwind.enable.off%"
+            ],
+            "scope": "resource",
+            "order": 36
+          },
+          "pxToRem.tailwind.preferScale": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.tailwind.preferScale%",
+            "scope": "resource",
+            "order": 37
+          },
+          "pxToRem.js.templateLiterals": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.js.templateLiterals%",
+            "scope": "resource",
+            "order": 38
+          },
+          "pxToRem.js.objectStyles": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.js.objectStyles%",
+            "scope": "resource",
+            "order": 39
+          },
+          "pxToRem.js.unitlessNumbers": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%config.js.unitlessNumbers%",
+            "scope": "resource",
+            "order": 40
+          },
+          "pxToRem.languages": {
+            "type": "array",
+            "default": [
+              "css",
+              "postcss",
+              "tailwindcss",
+              "scss",
+              "sass",
+              "less",
+              "stylus",
+              "html",
+              "vue",
+              "svelte",
+              "astro",
+              "php",
+              "javascriptreact",
+              "typescriptreact",
+              "javascript",
+              "typescript"
+            ],
+            "markdownDescription": "%config.languages%",
+            "items": {
+              "type": "string"
+            },
+            "order": 41
+          }
+        }
+      },
+      {
+        "id": "pxToRem.editor",
+        "title": "%config.title.editor%",
+        "properties": {
+          "pxToRem.maxFileSize": {
+            "type": "number",
+            "default": 1000000,
+            "markdownDescription": "%config.maxFileSize%",
+            "minimum": 1000,
+            "order": 42
+          },
+          "pxToRem.convertOnSave": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%config.convertOnSave%",
+            "scope": "resource",
+            "order": 43
+          },
+          "pxToRem.completion.enable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.completion.enable%",
+            "scope": "resource",
+            "order": 44
+          },
+          "pxToRem.paste.mode": {
+            "type": "string",
+            "default": "offer",
+            "markdownDescription": "%config.paste.mode%",
+            "enum": [
+              "offer",
+              "default",
+              "off"
+            ],
+            "enumDescriptions": [
+              "%config.paste.mode.offer%",
+              "%config.paste.mode.default%",
+              "%config.paste.mode.off%"
+            ],
+            "scope": "resource",
+            "order": 45
+          },
+          "pxToRem.hover.enable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.hover.enable%",
+            "scope": "resource",
+            "order": 46
+          },
+          "pxToRem.inlayHints.enable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.inlayHints.enable%",
+            "scope": "resource",
+            "order": 47
+          },
+          "pxToRem.inlayHints.variables": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.inlayHints.variables%",
+            "scope": "resource",
+            "order": 48
+          },
+          "pxToRem.codeLens": {
+            "type": "string",
+            "default": "file",
+            "markdownDescription": "%config.codeLens%",
+            "enum": [
+              "off",
+              "file",
+              "rule",
+              "line"
+            ],
+            "enumDescriptions": [
+              "%config.codeLens.off%",
+              "%config.codeLens.file%",
+              "%config.codeLens.rule%",
+              "%config.codeLens.line%"
+            ],
+            "scope": "resource",
+            "order": 49
+          },
+          "pxToRem.statusBar.enable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.statusBar.enable%",
+            "scope": "resource",
+            "order": 50
+          }
+        }
+      },
+      {
+        "id": "pxToRem.diagnostics",
+        "title": "%config.title.diagnostics%",
+        "properties": {
+          "pxToRem.diagnostics.enable": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.diagnostics.enable%",
+            "scope": "resource",
+            "order": 51
+          },
+          "pxToRem.diagnostics.rules": {
+            "type": "object",
+            "default": {},
+            "markdownDescription": "%config.diagnostics.rules%",
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "properties": {
+              "px-unit": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "off"
+              },
+              "font-size-px": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "information"
+              },
+              "line-height-px": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "information"
+              },
+              "letter-spacing-px": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "hint"
+              },
+              "media-query-px": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "hint"
+              },
+              "fixed-height-text": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "hint"
+              },
+              "text-width-px": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "hint"
+              },
+              "viewport-font-size": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "warning"
+              },
+              "fluid-zoom": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "warning"
+              },
+              "off-scale": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "hint"
+              },
+              "off-palette": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "hint"
+              },
+              "rem-function-missing": {
+                "type": "string",
+                "enum": [
+                  "off",
+                  "hint",
+                  "information",
+                  "warning",
+                  "error"
+                ],
+                "default": "warning"
+              }
+            },
+            "scope": "resource",
+            "order": 52
+          },
+          "pxToRem.diagnostics.scope": {
+            "type": "string",
+            "default": "all",
+            "markdownDescription": "%config.diagnostics.scope%",
+            "enum": [
+              "all",
+              "changedLines"
+            ],
+            "enumDescriptions": [
+              "%config.diagnostics.scope.all%",
+              "%config.diagnostics.scope.changedLines%"
+            ],
+            "scope": "resource",
+            "order": 53
+          }
+        }
+      },
+      {
+        "id": "pxToRem.workspace",
+        "title": "%config.title.workspace%",
+        "properties": {
+          "pxToRem.fileTypes": {
+            "type": "array",
+            "default": [
+              "css",
+              "scss",
+              "sass",
+              "less",
+              "styl",
+              "pcss",
+              "vue",
+              "svelte",
+              "astro",
+              "html",
+              "jsx",
+              "tsx"
+            ],
+            "markdownDescription": "%config.fileTypes%",
+            "items": {
+              "type": "string"
+            },
+            "scope": "resource",
+            "order": 54
+          },
+          "pxToRem.excludeFiles": {
+            "type": "array",
+            "default": [],
+            "markdownDescription": "%config.excludeFiles%",
+            "items": {
+              "type": "string"
+            },
+            "scope": "resource",
+            "order": 55
+          },
+          "pxToRem.respectGitignore": {
+            "type": "boolean",
+            "default": true,
+            "markdownDescription": "%config.respectGitignore%",
+            "scope": "resource",
+            "order": 56
+          },
+          "pxToRem.workspace.saveAfterConvert": {
+            "type": "boolean",
+            "default": false,
+            "markdownDescription": "%config.workspace.saveAfterConvert%",
+            "scope": "resource",
+            "order": 57
+          },
+          "pxToRem.workspace.maxFiles": {
+            "type": "number",
+            "default": 5000,
+            "markdownDescription": "%config.workspace.maxFiles%",
+            "minimum": 1,
+            "scope": "resource",
+            "order": 58
+          }
+        }
+      },
+      {
+        "id": "pxToRem.deprecated",
+        "title": "%config.title.deprecated%",
+        "properties": {
+          "pxToRem.directConversion": {
+            "type": "boolean",
+            "default": false,
+            "markdownDeprecationMessage": "%config.directConversion%",
+            "scope": "resource",
+            "order": 59
+          },
+          "pxToRem.keepPxInRem": {
+            "type": "boolean",
+            "default": false,
+            "markdownDeprecationMessage": "%config.keepPxInRem%",
+            "scope": "resource",
+            "order": 60
+          },
+          "pxToRem.scssInterpolation": {
+            "type": "boolean",
+            "default": false,
+            "markdownDeprecationMessage": "%config.scssInterpolation%",
+            "scope": "resource",
+            "order": 61
+          },
+          "pxToRem.enableDiagnostics": {
+            "type": "boolean",
+            "default": false,
+            "markdownDeprecationMessage": "%config.enableDiagnostics%",
+            "scope": "resource",
+            "order": 62
+          },
+          "pxToRem.diagnosticSeverity": {
+            "type": "string",
+            "default": "information",
+            "markdownDeprecationMessage": "%config.diagnosticSeverity%",
+            "enum": [
+              "error",
+              "warning",
+              "information",
+              "hint"
+            ],
+            "scope": "resource",
+            "order": 63
+          },
+          "pxToRem.enableCodeLens": {
+            "type": "boolean",
+            "default": true,
+            "markdownDeprecationMessage": "%config.enableCodeLens%",
+            "scope": "resource",
+            "order": 64
+          },
+          "pxToRem.enableInlayHints": {
+            "type": "boolean",
+            "default": true,
+            "markdownDeprecationMessage": "%config.enableInlayHints%",
+            "scope": "resource",
+            "order": 65
+          }
+        }
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "npm run build -- --production",
     "build": "node scripts/build.mjs",

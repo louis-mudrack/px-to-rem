@@ -45,12 +45,12 @@ const targets = [
     },
     {
         ...common,
-        entryPoints: ['src/cli/main.ts'],
-        outfile: 'cli/dist/px-to-rem.js',
+        entryPoints: ['src/cli/bin.ts'],
+        outfile: 'cli/dist/px-to-rem.mjs',
         platform: 'node',
-        format: 'cjs',
+        format: 'esm',
         target: 'node20',
-        banner: { js: '#!/usr/bin/env node' },
+        banner: { js: "#!/usr/bin/env node\nimport { createRequire as __pxCreateRequire } from 'node:module';\nconst require = __pxCreateRequire(import.meta.url);" },
     },
 ].filter(t => existsSync(t.entryPoints[0]));
 
@@ -61,7 +61,7 @@ if (watch) {
     await Promise.all(contexts.map(c => c.watch()));
 } else {
     await Promise.all(targets.map(t => esbuild.build(t)));
-    if (existsSync('cli/dist/px-to-rem.js')) {
-        chmodSync('cli/dist/px-to-rem.js', 0o755);
+    if (existsSync('cli/dist/px-to-rem.mjs')) {
+        chmodSync('cli/dist/px-to-rem.mjs', 0o755);
     }
 }

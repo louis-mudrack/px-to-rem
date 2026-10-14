@@ -1,0 +1,1236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/louis-mudrack/px-to-rem/master/schemas/pxtoremrc.schema.json",
+  "title": "PX to REM Toolkit configuration (.pxtoremrc.json)",
+  "description": "Project settings for the PX to REM Toolkit VS Code extension and the px-to-rem CLI.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string",
+      "description": "Output for converted values. Presets: auto (uses your rem() function in preprocessor files when the project defines one, otherwise 1rem), rem (1rem), rem-function (rem(16)), rem-function-px (rem(16px)), em, vw, vh, vmin, vmax, rpx, pt. Or a template with {rem}, {px}, {em}, {vw}, {vh}, {vmin}, {vmax}, {rpx}, {pt} and {fn} (the function name), e.g. toRem({px}).",
+      "markdownDescription": "Output for converted values. Presets: `auto` (uses your `rem()` function in preprocessor files when the project defines one, otherwise `1rem`), `rem` (`1rem`), `rem-function` (`rem(16)`), `rem-function-px` (`rem(16px)`), `em`, `vw`, `vh`, `vmin`, `vmax`, `rpx`, `pt`. Or a template with `{rem}`, `{px}`, `{em}`, `{vw}`, `{vh}`, `{vmin}`, `{vmax}`, `{rpx}`, `{pt}` and `{fn}` (the function name), e.g. `toRem({px})`.",
+      "default": "auto"
+    },
+    "functionName": {
+      "type": "string",
+      "description": "Name of your px-to-rem function, used by the function formats, reverse conversion and helper generation.",
+      "markdownDescription": "Name of your px-to-rem function, used by the function formats, reverse conversion and helper generation.",
+      "default": "rem"
+    },
+    "mode": {
+      "type": "string",
+      "description": "How values are converted.",
+      "markdownDescription": "How values are converted.",
+      "default": "smart",
+      "enum": [
+        "smart",
+        "simple"
+      ],
+      "markdownEnumDescriptions": [
+        "Pick the best unit per property: font sizes and spacing become rem, line-height becomes unitless, letter-spacing becomes em, borders and shadows stay px, media queries become em.",
+        "Convert every px value with the same format."
+      ]
+    },
+    "baseFontSize": {
+      "type": "number",
+      "description": "Root font size in px (1rem). Used when detection is off or finds nothing.",
+      "markdownDescription": "Root font size in px (1rem). Used when detection is off or finds nothing.",
+      "default": 16,
+      "minimum": 1
+    },
+    "baseFontSizeDetection": {
+      "type": "string",
+      "description": "Detect the root font size from the project.",
+      "markdownDescription": "Detect the root font size from the project.",
+      "default": "auto",
+      "enum": [
+        "auto",
+        "off"
+      ],
+      "markdownEnumDescriptions": [
+        "Read the root font size from `html`/`:root` rules (e.g. `font-size: 62.5%` → 10px) or a postcss-pxtorem `rootValue`, unless `baseFontSize` is set explicitly.",
+        "Always use `baseFontSize`."
+      ]
+    },
+    "precision": {
+      "type": "number",
+      "description": "Maximum number of decimal places in generated values.",
+      "markdownDescription": "Maximum number of decimal places in generated values.",
+      "default": 4,
+      "minimum": 0,
+      "maximum": 10
+    },
+    "leadingZero": {
+      "type": "boolean",
+      "description": "Write 0.5rem instead of .5rem.",
+      "markdownDescription": "Write `0.5rem` instead of `.5rem`.",
+      "default": true
+    },
+    "preserveZero": {
+      "type": "boolean",
+      "description": "Write 0px as 0 instead of 0rem.",
+      "markdownDescription": "Write `0px` as `0` instead of `0rem`.",
+      "default": true
+    },
+    "minValue": {
+      "type": "number",
+      "description": "Smallest absolute px value to convert (e.g. 2 keeps 1px).",
+      "markdownDescription": "Smallest absolute px value to convert (e.g. 2 keeps 1px).",
+      "default": 0,
+      "minimum": 0
+    },
+    "maxValue": {
+      "type": "number",
+      "description": "Largest absolute px value to convert.",
+      "markdownDescription": "Largest absolute px value to convert.",
+      "default": 9999,
+      "minimum": 0
+    },
+    "includeProperties": {
+      "type": "array",
+      "description": "Only convert these properties (globs such as padding* work). Empty means all.",
+      "markdownDescription": "Only convert these properties (globs such as `padding*` work). Empty means all.",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "excludeProperties": {
+      "type": "array",
+      "description": "Never convert these properties (globs such as border* work).",
+      "markdownDescription": "Never convert these properties (globs such as `border*` work).",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "excludePatterns": {
+      "type": "array",
+      "description": "Regular expressions; lines that match are left alone. Prefer /* px-to-rem-disable-next-line */ comments.",
+      "markdownDescription": "Regular expressions; lines that match are left alone. Prefer `/* px-to-rem-disable-next-line */` comments.",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "ignoreUppercasePx": {
+      "type": "boolean",
+      "description": "Leave PX (uppercase) alone, like postcss-pxtorem.",
+      "markdownDescription": "Leave `PX` (uppercase) alone, like postcss-pxtorem.",
+      "default": true
+    },
+    "mediaQueries": {
+      "type": "string",
+      "description": "What to do with px in @media and @container queries.",
+      "markdownDescription": "What to do with px in `@media` and `@container` queries.",
+      "default": "em",
+      "enum": [
+        "em",
+        "rem",
+        "keep",
+        "convert"
+      ],
+      "markdownEnumDescriptions": [
+        "Convert breakpoints to em (relative to the browser default, so they follow the user font size).",
+        "Convert breakpoints to rem (also relative to the browser default inside media queries).",
+        "Leave media and container queries alone.",
+        "Use `format` like everywhere else."
+      ]
+    },
+    "mediaQueryBase": {
+      "type": "number",
+      "description": "Font size media queries are relative to. Browsers use their default (16px), not your html font size.",
+      "markdownDescription": "Font size media queries are relative to. Browsers use their default (16px), not your `html` font size.",
+      "default": 16,
+      "minimum": 1
+    },
+    "interpolateInCalc": {
+      "type": "boolean",
+      "description": "Wrap function output in #{} inside calc(), clamp(), min() and max() (Sass).",
+      "markdownDescription": "Wrap function output in `#{}` inside `calc()`, `clamp()`, `min()` and `max()` (Sass).",
+      "default": false
+    },
+    "convertVariables": {
+      "type": "boolean",
+      "description": "Convert values of Sass/Less/Stylus variables and CSS custom properties.",
+      "markdownDescription": "Convert values of Sass/Less/Stylus variables and CSS custom properties.",
+      "default": true
+    },
+    "convertMixinArguments": {
+      "type": "boolean",
+      "description": "Convert px passed to mixins (@include size(16px)). Breakpoint mixins are never touched.",
+      "markdownDescription": "Convert px passed to mixins (`@include size(16px)`). Breakpoint mixins are never touched.",
+      "default": true
+    },
+    "smartRules": {
+      "type": "object",
+      "description": "Smart mode rules per property (globs allowed), merged over the defaults. Actions: convert (use format), rem, em (relative to the element font size), unitless (ratio to the element font size), keep. Defaults: {\"font-size\":\"convert\",\"line-height\":\"unitless\",\"letter-spacing\":\"em\",\"word-spacing\":\"em\",\"border\":\"keep\",\"border-width\":\"keep\",\"border-*-width\":\"keep\",\"border-top\":\"keep\",\"border-right\":\"keep\",\"border-bottom\":\"keep\",\"border-left\":\"keep\",\"border-block\":\"keep\",\"border-block-start\":\"keep\",\"border-block-end\":\"keep\",\"border-inline\":\"keep\",\"border-inline-start\":\"keep\",\"border-inline-end\":\"keep\",\"border-spacing\":\"convert\",\"*-radius\":\"convert\",\"outline\":\"keep\",\"outline-width\":\"keep\",\"outline-offset\":\"keep\",\"box-shadow\":\"keep\",\"text-shadow\":\"keep\",\"column-rule\":\"keep\",\"column-rule-width\":\"keep\",\"stroke-width\":\"keep\",\"-webkit-text-stroke\":\"keep\",\"-webkit-text-stroke-width\":\"keep\",\"filter\":\"keep\",\"backdrop-filter\":\"keep\",\"text-decoration-thickness\":\"em\",\"text-underline-offset\":\"em\"}",
+      "markdownDescription": "Smart mode rules per property (globs allowed), merged over the defaults. Actions: `convert` (use `format`), `rem`, `em` (relative to the element font size), `unitless` (ratio to the element font size), `keep`.",
+      "default": {},
+      "examples": [
+        {
+          "border": "convert",
+          "letter-spacing": "rem"
+        }
+      ],
+      "additionalProperties": {
+        "type": "string",
+        "enum": [
+          "convert",
+          "rem",
+          "em",
+          "unitless",
+          "keep"
+        ]
+      }
+    },
+    "hairline": {
+      "type": "number",
+      "description": "Smart mode keeps values up to this many px as px (hairlines, 1px nudges). 0 turns it off.",
+      "markdownDescription": "Smart mode keeps values up to this many px as px (hairlines, 1px nudges). 0 turns it off.",
+      "default": 1,
+      "minimum": 0
+    },
+    "designWidth": {
+      "type": "number",
+      "description": "Design viewport width in px, for vw, vmin, vmax and rpx.",
+      "markdownDescription": "Design viewport width in px, for vw, vmin, vmax and rpx.",
+      "default": 1440,
+      "minimum": 1
+    },
+    "designHeight": {
+      "type": "number",
+      "description": "Design viewport height in px, for vh, vmin and vmax.",
+      "markdownDescription": "Design viewport height in px, for vh, vmin and vmax.",
+      "default": 900,
+      "minimum": 1
+    },
+    "reverseUnits": {
+      "type": "array",
+      "description": "What \"Convert back to px\" rewrites: rem, em, vw, vh, vmin, vmax, rpx, pt and function (rem(16)).",
+      "markdownDescription": "What \"Convert back to px\" rewrites: `rem`, `em`, `vw`, `vh`, `vmin`, `vmax`, `rpx`, `pt` and `function` (`rem(16)`).",
+      "default": [
+        "rem",
+        "function"
+      ],
+      "items": {
+        "type": "string",
+        "enum": [
+          "rem",
+          "em",
+          "vw",
+          "vh",
+          "vmin",
+          "vmax",
+          "rpx",
+          "pt",
+          "function"
+        ]
+      }
+    },
+    "fluid": {
+      "type": "object",
+      "properties": {
+        "minViewport": {
+          "type": "number",
+          "description": "Smallest viewport width for fluid clamp() values.",
+          "markdownDescription": "Smallest viewport width for fluid `clamp()` values.",
+          "default": 375,
+          "minimum": 1
+        },
+        "maxViewport": {
+          "type": "number",
+          "description": "Largest viewport width for fluid clamp() values.",
+          "markdownDescription": "Largest viewport width for fluid `clamp()` values.",
+          "default": 1440,
+          "minimum": 1
+        },
+        "breakpoints": {
+          "type": "array",
+          "description": "Viewport widths shown when explaining clamp(), calc(), min() and max().",
+          "markdownDescription": "Viewport widths shown when explaining `clamp()`, `calc()`, `min()` and `max()`.",
+          "default": [
+            320,
+            375,
+            768,
+            1024,
+            1280,
+            1440,
+            1920
+          ],
+          "items": {
+            "type": "number"
+          }
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit that makes generated clamp() values fluid.",
+          "markdownDescription": "Unit that makes generated `clamp()` values fluid.",
+          "default": "vw",
+          "enum": [
+            "vw",
+            "cqi"
+          ],
+          "markdownEnumDescriptions": [
+            "Scale with the viewport.",
+            "Scale with the nearest container (container query units)."
+          ]
+        },
+        "checkZoom": {
+          "type": "boolean",
+          "description": "Check fluid font sizes against WCAG 1.4.4 (text must reach 200% with browser zoom).",
+          "markdownDescription": "Check fluid font sizes against WCAG 1.4.4 (text must reach 200% with browser zoom).",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "tokens": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "Use design tokens (CSS custom properties, Sass/Less/Stylus variables, token JSON files) for snapping, hovers and quick fixes.",
+          "markdownDescription": "Use design tokens (CSS custom properties, Sass/Less/Stylus variables, token JSON files) for snapping, hovers and quick fixes.",
+          "default": true
+        },
+        "sources": {
+          "type": "array",
+          "description": "Files or globs that define tokens (.css, .scss, .less, .styl, DTCG/Tokens Studio/Style Dictionary .json). Empty means auto-detect.",
+          "markdownDescription": "Files or globs that define tokens (`.css`, `.scss`, `.less`, `.styl`, DTCG/Tokens Studio/Style Dictionary `.json`). Empty means auto-detect.",
+          "default": [],
+          "items": {
+            "type": "string"
+          }
+        },
+        "autoDetect": {
+          "type": "boolean",
+          "description": "Find tokens in the workspace when tokens.sources is empty.",
+          "markdownDescription": "Find tokens in the workspace when `tokens.sources` is empty.",
+          "default": true
+        },
+        "preferTokens": {
+          "type": "boolean",
+          "description": "When a px value exactly matches a token, convert it to the token (e.g. var(--space-4)) instead of rem.",
+          "markdownDescription": "When a px value exactly matches a token, convert it to the token (e.g. `var(--space-4)`) instead of rem.",
+          "default": false
+        },
+        "reference": {
+          "type": "string",
+          "description": "How tokens from JSON files are referenced in CSS. {name} is the token path joined with -.",
+          "markdownDescription": "How tokens from JSON files are referenced in CSS. `{name}` is the token path joined with `-`.",
+          "default": "var(--{name})"
+        },
+        "colors": {
+          "type": "boolean",
+          "description": "Also match literal colours against colour tokens.",
+          "markdownDescription": "Also match literal colours against colour tokens.",
+          "default": true
+        },
+        "colorTolerance": {
+          "type": "number",
+          "description": "Maximum colour difference (CIEDE2000) for suggesting a nearby colour token. Around 2 is barely visible.",
+          "markdownDescription": "Maximum colour difference (CIEDE2000) for suggesting a nearby colour token. Around 2 is barely visible.",
+          "default": 3,
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "tailwind": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "string",
+          "description": "Convert Tailwind arbitrary values such as p-[16px].",
+          "markdownDescription": "Convert Tailwind arbitrary values such as `p-[16px]`.",
+          "default": "auto",
+          "enum": [
+            "auto",
+            "on",
+            "off"
+          ],
+          "markdownEnumDescriptions": [
+            "On when the project depends on Tailwind CSS.",
+            "Always on.",
+            "Off."
+          ]
+        },
+        "preferScale": {
+          "type": "boolean",
+          "description": "Use the scale class when one matches (p-[16px] → p-4) instead of p-[1rem].",
+          "markdownDescription": "Use the scale class when one matches (`p-[16px]` → `p-4`) instead of `p-[1rem]`.",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "js": {
+      "type": "object",
+      "properties": {
+        "templateLiterals": {
+          "type": "boolean",
+          "description": "Convert CSS in styled-components, emotion, Lit and Linaria templates.",
+          "markdownDescription": "Convert CSS in styled-components, emotion, Lit and Linaria templates.",
+          "default": true
+        },
+        "objectStyles": {
+          "type": "boolean",
+          "description": "Convert px strings in style objects ({ fontSize: '16px' }).",
+          "markdownDescription": "Convert px strings in style objects (`{ fontSize: '16px' }`).",
+          "default": true
+        },
+        "unitlessNumbers": {
+          "type": "boolean",
+          "description": "Also convert numbers React treats as px ({ fontSize: 16 } → { fontSize: '1rem' }). Off by default; React Native projects never convert.",
+          "markdownDescription": "Also convert numbers React treats as px (`{ fontSize: 16 }` → `{ fontSize: '1rem' }`). Off by default; React Native projects never convert.",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "fileTypes": {
+      "type": "array",
+      "description": "File extensions included in workspace conversion and statistics.",
+      "markdownDescription": "File extensions included in workspace conversion and statistics.",
+      "default": [
+        "css",
+        "scss",
+        "sass",
+        "less",
+        "styl",
+        "pcss",
+        "vue",
+        "svelte",
+        "astro",
+        "html",
+        "jsx",
+        "tsx"
+      ],
+      "items": {
+        "type": "string"
+      }
+    },
+    "excludeFiles": {
+      "type": "array",
+      "description": "Glob patterns for files to ignore (e.g. **/*.min.css, **/vendor/**). node_modules is always ignored.",
+      "markdownDescription": "Glob patterns for files to ignore (e.g. `**/*.min.css`, `**/vendor/**`). `node_modules` is always ignored.",
+      "default": [],
+      "items": {
+        "type": "string"
+      }
+    },
+    "respectGitignore": {
+      "type": "boolean",
+      "description": "Skip files ignored by .gitignore in workspace operations.",
+      "markdownDescription": "Skip files ignored by `.gitignore` in workspace operations.",
+      "default": true
+    },
+    "diagnostics": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean",
+          "description": "Report diagnostics (accessibility, off-scale values, …).",
+          "markdownDescription": "Report diagnostics (accessibility, off-scale values, …).",
+          "default": true
+        },
+        "rules": {
+          "type": "object",
+          "description": "Severity per rule, merged over the defaults. Rules: px-unit, font-size-px, line-height-px, letter-spacing-px, media-query-px, fixed-height-text, text-width-px, viewport-font-size, fluid-zoom, off-scale, off-palette, rem-function-missing.",
+          "markdownDescription": "Severity per rule, merged over the defaults. Rules: `px-unit`, `font-size-px`, `line-height-px`, `letter-spacing-px`, `media-query-px`, `fixed-height-text`, `text-width-px`, `viewport-font-size`, `fluid-zoom`, `off-scale`, `off-palette`, `rem-function-missing`.",
+          "default": {},
+          "additionalProperties": {
+            "type": "string",
+            "enum": [
+              "off",
+              "hint",
+              "information",
+              "warning",
+              "error"
+            ]
+          },
+          "properties": {
+            "px-unit": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "font-size-px": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "line-height-px": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "letter-spacing-px": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "media-query-px": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "fixed-height-text": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "text-width-px": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "viewport-font-size": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "fluid-zoom": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "off-scale": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "off-palette": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            },
+            "rem-function-missing": {
+              "type": "string",
+              "enum": [
+                "off",
+                "hint",
+                "information",
+                "warning",
+                "error"
+              ]
+            }
+          }
+        },
+        "scope": {
+          "type": "string",
+          "description": "Where diagnostics are reported.",
+          "markdownDescription": "Where diagnostics are reported.",
+          "default": "all",
+          "enum": [
+            "all",
+            "changedLines"
+          ],
+          "markdownEnumDescriptions": [
+            "Report everywhere.",
+            "Only report on lines changed since the last commit (git)."
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "workspace": {
+      "type": "object",
+      "properties": {
+        "maxFiles": {
+          "type": "number",
+          "description": "Maximum number of files scanned for workspace statistics and conversion.",
+          "markdownDescription": "Maximum number of files scanned for workspace statistics and conversion.",
+          "default": 5000,
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "overrides": {
+      "type": "array",
+      "description": "Settings for files matching glob patterns (relative to the project root).",
+      "items": {
+        "type": "object",
+        "required": [
+          "files"
+        ],
+        "properties": {
+          "files": {
+            "description": "Glob pattern(s).",
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            ]
+          },
+          "format": {
+            "type": "string",
+            "description": "Output for converted values. Presets: auto (uses your rem() function in preprocessor files when the project defines one, otherwise 1rem), rem (1rem), rem-function (rem(16)), rem-function-px (rem(16px)), em, vw, vh, vmin, vmax, rpx, pt. Or a template with {rem}, {px}, {em}, {vw}, {vh}, {vmin}, {vmax}, {rpx}, {pt} and {fn} (the function name), e.g. toRem({px}).",
+            "markdownDescription": "Output for converted values. Presets: `auto` (uses your `rem()` function in preprocessor files when the project defines one, otherwise `1rem`), `rem` (`1rem`), `rem-function` (`rem(16)`), `rem-function-px` (`rem(16px)`), `em`, `vw`, `vh`, `vmin`, `vmax`, `rpx`, `pt`. Or a template with `{rem}`, `{px}`, `{em}`, `{vw}`, `{vh}`, `{vmin}`, `{vmax}`, `{rpx}`, `{pt}` and `{fn}` (the function name), e.g. `toRem({px})`.",
+            "default": "auto"
+          },
+          "functionName": {
+            "type": "string",
+            "description": "Name of your px-to-rem function, used by the function formats, reverse conversion and helper generation.",
+            "markdownDescription": "Name of your px-to-rem function, used by the function formats, reverse conversion and helper generation.",
+            "default": "rem"
+          },
+          "mode": {
+            "type": "string",
+            "description": "How values are converted.",
+            "markdownDescription": "How values are converted.",
+            "default": "smart",
+            "enum": [
+              "smart",
+              "simple"
+            ],
+            "markdownEnumDescriptions": [
+              "Pick the best unit per property: font sizes and spacing become rem, line-height becomes unitless, letter-spacing becomes em, borders and shadows stay px, media queries become em.",
+              "Convert every px value with the same format."
+            ]
+          },
+          "baseFontSize": {
+            "type": "number",
+            "description": "Root font size in px (1rem). Used when detection is off or finds nothing.",
+            "markdownDescription": "Root font size in px (1rem). Used when detection is off or finds nothing.",
+            "default": 16,
+            "minimum": 1
+          },
+          "baseFontSizeDetection": {
+            "type": "string",
+            "description": "Detect the root font size from the project.",
+            "markdownDescription": "Detect the root font size from the project.",
+            "default": "auto",
+            "enum": [
+              "auto",
+              "off"
+            ],
+            "markdownEnumDescriptions": [
+              "Read the root font size from `html`/`:root` rules (e.g. `font-size: 62.5%` → 10px) or a postcss-pxtorem `rootValue`, unless `baseFontSize` is set explicitly.",
+              "Always use `baseFontSize`."
+            ]
+          },
+          "precision": {
+            "type": "number",
+            "description": "Maximum number of decimal places in generated values.",
+            "markdownDescription": "Maximum number of decimal places in generated values.",
+            "default": 4,
+            "minimum": 0,
+            "maximum": 10
+          },
+          "leadingZero": {
+            "type": "boolean",
+            "description": "Write 0.5rem instead of .5rem.",
+            "markdownDescription": "Write `0.5rem` instead of `.5rem`.",
+            "default": true
+          },
+          "preserveZero": {
+            "type": "boolean",
+            "description": "Write 0px as 0 instead of 0rem.",
+            "markdownDescription": "Write `0px` as `0` instead of `0rem`.",
+            "default": true
+          },
+          "minValue": {
+            "type": "number",
+            "description": "Smallest absolute px value to convert (e.g. 2 keeps 1px).",
+            "markdownDescription": "Smallest absolute px value to convert (e.g. 2 keeps 1px).",
+            "default": 0,
+            "minimum": 0
+          },
+          "maxValue": {
+            "type": "number",
+            "description": "Largest absolute px value to convert.",
+            "markdownDescription": "Largest absolute px value to convert.",
+            "default": 9999,
+            "minimum": 0
+          },
+          "includeProperties": {
+            "type": "array",
+            "description": "Only convert these properties (globs such as padding* work). Empty means all.",
+            "markdownDescription": "Only convert these properties (globs such as `padding*` work). Empty means all.",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludeProperties": {
+            "type": "array",
+            "description": "Never convert these properties (globs such as border* work).",
+            "markdownDescription": "Never convert these properties (globs such as `border*` work).",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludePatterns": {
+            "type": "array",
+            "description": "Regular expressions; lines that match are left alone. Prefer /* px-to-rem-disable-next-line */ comments.",
+            "markdownDescription": "Regular expressions; lines that match are left alone. Prefer `/* px-to-rem-disable-next-line */` comments.",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "ignoreUppercasePx": {
+            "type": "boolean",
+            "description": "Leave PX (uppercase) alone, like postcss-pxtorem.",
+            "markdownDescription": "Leave `PX` (uppercase) alone, like postcss-pxtorem.",
+            "default": true
+          },
+          "mediaQueries": {
+            "type": "string",
+            "description": "What to do with px in @media and @container queries.",
+            "markdownDescription": "What to do with px in `@media` and `@container` queries.",
+            "default": "em",
+            "enum": [
+              "em",
+              "rem",
+              "keep",
+              "convert"
+            ],
+            "markdownEnumDescriptions": [
+              "Convert breakpoints to em (relative to the browser default, so they follow the user font size).",
+              "Convert breakpoints to rem (also relative to the browser default inside media queries).",
+              "Leave media and container queries alone.",
+              "Use `format` like everywhere else."
+            ]
+          },
+          "mediaQueryBase": {
+            "type": "number",
+            "description": "Font size media queries are relative to. Browsers use their default (16px), not your html font size.",
+            "markdownDescription": "Font size media queries are relative to. Browsers use their default (16px), not your `html` font size.",
+            "default": 16,
+            "minimum": 1
+          },
+          "interpolateInCalc": {
+            "type": "boolean",
+            "description": "Wrap function output in #{} inside calc(), clamp(), min() and max() (Sass).",
+            "markdownDescription": "Wrap function output in `#{}` inside `calc()`, `clamp()`, `min()` and `max()` (Sass).",
+            "default": false
+          },
+          "convertVariables": {
+            "type": "boolean",
+            "description": "Convert values of Sass/Less/Stylus variables and CSS custom properties.",
+            "markdownDescription": "Convert values of Sass/Less/Stylus variables and CSS custom properties.",
+            "default": true
+          },
+          "convertMixinArguments": {
+            "type": "boolean",
+            "description": "Convert px passed to mixins (@include size(16px)). Breakpoint mixins are never touched.",
+            "markdownDescription": "Convert px passed to mixins (`@include size(16px)`). Breakpoint mixins are never touched.",
+            "default": true
+          },
+          "smartRules": {
+            "type": "object",
+            "description": "Smart mode rules per property (globs allowed), merged over the defaults. Actions: convert (use format), rem, em (relative to the element font size), unitless (ratio to the element font size), keep. Defaults: {\"font-size\":\"convert\",\"line-height\":\"unitless\",\"letter-spacing\":\"em\",\"word-spacing\":\"em\",\"border\":\"keep\",\"border-width\":\"keep\",\"border-*-width\":\"keep\",\"border-top\":\"keep\",\"border-right\":\"keep\",\"border-bottom\":\"keep\",\"border-left\":\"keep\",\"border-block\":\"keep\",\"border-block-start\":\"keep\",\"border-block-end\":\"keep\",\"border-inline\":\"keep\",\"border-inline-start\":\"keep\",\"border-inline-end\":\"keep\",\"border-spacing\":\"convert\",\"*-radius\":\"convert\",\"outline\":\"keep\",\"outline-width\":\"keep\",\"outline-offset\":\"keep\",\"box-shadow\":\"keep\",\"text-shadow\":\"keep\",\"column-rule\":\"keep\",\"column-rule-width\":\"keep\",\"stroke-width\":\"keep\",\"-webkit-text-stroke\":\"keep\",\"-webkit-text-stroke-width\":\"keep\",\"filter\":\"keep\",\"backdrop-filter\":\"keep\",\"text-decoration-thickness\":\"em\",\"text-underline-offset\":\"em\"}",
+            "markdownDescription": "Smart mode rules per property (globs allowed), merged over the defaults. Actions: `convert` (use `format`), `rem`, `em` (relative to the element font size), `unitless` (ratio to the element font size), `keep`.",
+            "default": {},
+            "examples": [
+              {
+                "border": "convert",
+                "letter-spacing": "rem"
+              }
+            ],
+            "additionalProperties": {
+              "type": "string",
+              "enum": [
+                "convert",
+                "rem",
+                "em",
+                "unitless",
+                "keep"
+              ]
+            }
+          },
+          "hairline": {
+            "type": "number",
+            "description": "Smart mode keeps values up to this many px as px (hairlines, 1px nudges). 0 turns it off.",
+            "markdownDescription": "Smart mode keeps values up to this many px as px (hairlines, 1px nudges). 0 turns it off.",
+            "default": 1,
+            "minimum": 0
+          },
+          "designWidth": {
+            "type": "number",
+            "description": "Design viewport width in px, for vw, vmin, vmax and rpx.",
+            "markdownDescription": "Design viewport width in px, for vw, vmin, vmax and rpx.",
+            "default": 1440,
+            "minimum": 1
+          },
+          "designHeight": {
+            "type": "number",
+            "description": "Design viewport height in px, for vh, vmin and vmax.",
+            "markdownDescription": "Design viewport height in px, for vh, vmin and vmax.",
+            "default": 900,
+            "minimum": 1
+          },
+          "reverseUnits": {
+            "type": "array",
+            "description": "What \"Convert back to px\" rewrites: rem, em, vw, vh, vmin, vmax, rpx, pt and function (rem(16)).",
+            "markdownDescription": "What \"Convert back to px\" rewrites: `rem`, `em`, `vw`, `vh`, `vmin`, `vmax`, `rpx`, `pt` and `function` (`rem(16)`).",
+            "default": [
+              "rem",
+              "function"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "rem",
+                "em",
+                "vw",
+                "vh",
+                "vmin",
+                "vmax",
+                "rpx",
+                "pt",
+                "function"
+              ]
+            }
+          },
+          "fluid": {
+            "type": "object",
+            "properties": {
+              "minViewport": {
+                "type": "number",
+                "description": "Smallest viewport width for fluid clamp() values.",
+                "markdownDescription": "Smallest viewport width for fluid `clamp()` values.",
+                "default": 375,
+                "minimum": 1
+              },
+              "maxViewport": {
+                "type": "number",
+                "description": "Largest viewport width for fluid clamp() values.",
+                "markdownDescription": "Largest viewport width for fluid `clamp()` values.",
+                "default": 1440,
+                "minimum": 1
+              },
+              "breakpoints": {
+                "type": "array",
+                "description": "Viewport widths shown when explaining clamp(), calc(), min() and max().",
+                "markdownDescription": "Viewport widths shown when explaining `clamp()`, `calc()`, `min()` and `max()`.",
+                "default": [
+                  320,
+                  375,
+                  768,
+                  1024,
+                  1280,
+                  1440,
+                  1920
+                ],
+                "items": {
+                  "type": "number"
+                }
+              },
+              "unit": {
+                "type": "string",
+                "description": "Unit that makes generated clamp() values fluid.",
+                "markdownDescription": "Unit that makes generated `clamp()` values fluid.",
+                "default": "vw",
+                "enum": [
+                  "vw",
+                  "cqi"
+                ],
+                "markdownEnumDescriptions": [
+                  "Scale with the viewport.",
+                  "Scale with the nearest container (container query units)."
+                ]
+              },
+              "checkZoom": {
+                "type": "boolean",
+                "description": "Check fluid font sizes against WCAG 1.4.4 (text must reach 200% with browser zoom).",
+                "markdownDescription": "Check fluid font sizes against WCAG 1.4.4 (text must reach 200% with browser zoom).",
+                "default": true
+              }
+            },
+            "additionalProperties": false
+          },
+          "tokens": {
+            "type": "object",
+            "properties": {
+              "enable": {
+                "type": "boolean",
+                "description": "Use design tokens (CSS custom properties, Sass/Less/Stylus variables, token JSON files) for snapping, hovers and quick fixes.",
+                "markdownDescription": "Use design tokens (CSS custom properties, Sass/Less/Stylus variables, token JSON files) for snapping, hovers and quick fixes.",
+                "default": true
+              },
+              "sources": {
+                "type": "array",
+                "description": "Files or globs that define tokens (.css, .scss, .less, .styl, DTCG/Tokens Studio/Style Dictionary .json). Empty means auto-detect.",
+                "markdownDescription": "Files or globs that define tokens (`.css`, `.scss`, `.less`, `.styl`, DTCG/Tokens Studio/Style Dictionary `.json`). Empty means auto-detect.",
+                "default": [],
+                "items": {
+                  "type": "string"
+                }
+              },
+              "autoDetect": {
+                "type": "boolean",
+                "description": "Find tokens in the workspace when tokens.sources is empty.",
+                "markdownDescription": "Find tokens in the workspace when `tokens.sources` is empty.",
+                "default": true
+              },
+              "preferTokens": {
+                "type": "boolean",
+                "description": "When a px value exactly matches a token, convert it to the token (e.g. var(--space-4)) instead of rem.",
+                "markdownDescription": "When a px value exactly matches a token, convert it to the token (e.g. `var(--space-4)`) instead of rem.",
+                "default": false
+              },
+              "reference": {
+                "type": "string",
+                "description": "How tokens from JSON files are referenced in CSS. {name} is the token path joined with -.",
+                "markdownDescription": "How tokens from JSON files are referenced in CSS. `{name}` is the token path joined with `-`.",
+                "default": "var(--{name})"
+              },
+              "colors": {
+                "type": "boolean",
+                "description": "Also match literal colours against colour tokens.",
+                "markdownDescription": "Also match literal colours against colour tokens.",
+                "default": true
+              },
+              "colorTolerance": {
+                "type": "number",
+                "description": "Maximum colour difference (CIEDE2000) for suggesting a nearby colour token. Around 2 is barely visible.",
+                "markdownDescription": "Maximum colour difference (CIEDE2000) for suggesting a nearby colour token. Around 2 is barely visible.",
+                "default": 3,
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false
+          },
+          "tailwind": {
+            "type": "object",
+            "properties": {
+              "enable": {
+                "type": "string",
+                "description": "Convert Tailwind arbitrary values such as p-[16px].",
+                "markdownDescription": "Convert Tailwind arbitrary values such as `p-[16px]`.",
+                "default": "auto",
+                "enum": [
+                  "auto",
+                  "on",
+                  "off"
+                ],
+                "markdownEnumDescriptions": [
+                  "On when the project depends on Tailwind CSS.",
+                  "Always on.",
+                  "Off."
+                ]
+              },
+              "preferScale": {
+                "type": "boolean",
+                "description": "Use the scale class when one matches (p-[16px] → p-4) instead of p-[1rem].",
+                "markdownDescription": "Use the scale class when one matches (`p-[16px]` → `p-4`) instead of `p-[1rem]`.",
+                "default": true
+              }
+            },
+            "additionalProperties": false
+          },
+          "js": {
+            "type": "object",
+            "properties": {
+              "templateLiterals": {
+                "type": "boolean",
+                "description": "Convert CSS in styled-components, emotion, Lit and Linaria templates.",
+                "markdownDescription": "Convert CSS in styled-components, emotion, Lit and Linaria templates.",
+                "default": true
+              },
+              "objectStyles": {
+                "type": "boolean",
+                "description": "Convert px strings in style objects ({ fontSize: '16px' }).",
+                "markdownDescription": "Convert px strings in style objects (`{ fontSize: '16px' }`).",
+                "default": true
+              },
+              "unitlessNumbers": {
+                "type": "boolean",
+                "description": "Also convert numbers React treats as px ({ fontSize: 16 } → { fontSize: '1rem' }). Off by default; React Native projects never convert.",
+                "markdownDescription": "Also convert numbers React treats as px (`{ fontSize: 16 }` → `{ fontSize: '1rem' }`). Off by default; React Native projects never convert.",
+                "default": false
+              }
+            },
+            "additionalProperties": false
+          },
+          "fileTypes": {
+            "type": "array",
+            "description": "File extensions included in workspace conversion and statistics.",
+            "markdownDescription": "File extensions included in workspace conversion and statistics.",
+            "default": [
+              "css",
+              "scss",
+              "sass",
+              "less",
+              "styl",
+              "pcss",
+              "vue",
+              "svelte",
+              "astro",
+              "html",
+              "jsx",
+              "tsx"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "excludeFiles": {
+            "type": "array",
+            "description": "Glob patterns for files to ignore (e.g. **/*.min.css, **/vendor/**). node_modules is always ignored.",
+            "markdownDescription": "Glob patterns for files to ignore (e.g. `**/*.min.css`, `**/vendor/**`). `node_modules` is always ignored.",
+            "default": [],
+            "items": {
+              "type": "string"
+            }
+          },
+          "respectGitignore": {
+            "type": "boolean",
+            "description": "Skip files ignored by .gitignore in workspace operations.",
+            "markdownDescription": "Skip files ignored by `.gitignore` in workspace operations.",
+            "default": true
+          },
+          "diagnostics": {
+            "type": "object",
+            "properties": {
+              "enable": {
+                "type": "boolean",
+                "description": "Report diagnostics (accessibility, off-scale values, …).",
+                "markdownDescription": "Report diagnostics (accessibility, off-scale values, …).",
+                "default": true
+              },
+              "rules": {
+                "type": "object",
+                "description": "Severity per rule, merged over the defaults. Rules: px-unit, font-size-px, line-height-px, letter-spacing-px, media-query-px, fixed-height-text, text-width-px, viewport-font-size, fluid-zoom, off-scale, off-palette, rem-function-missing.",
+                "markdownDescription": "Severity per rule, merged over the defaults. Rules: `px-unit`, `font-size-px`, `line-height-px`, `letter-spacing-px`, `media-query-px`, `fixed-height-text`, `text-width-px`, `viewport-font-size`, `fluid-zoom`, `off-scale`, `off-palette`, `rem-function-missing`.",
+                "default": {},
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "off",
+                    "hint",
+                    "information",
+                    "warning",
+                    "error"
+                  ]
+                },
+                "properties": {
+                  "px-unit": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "font-size-px": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "line-height-px": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "letter-spacing-px": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "media-query-px": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "fixed-height-text": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "text-width-px": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "viewport-font-size": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "fluid-zoom": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "off-scale": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "off-palette": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  },
+                  "rem-function-missing": {
+                    "type": "string",
+                    "enum": [
+                      "off",
+                      "hint",
+                      "information",
+                      "warning",
+                      "error"
+                    ]
+                  }
+                }
+              },
+              "scope": {
+                "type": "string",
+                "description": "Where diagnostics are reported.",
+                "markdownDescription": "Where diagnostics are reported.",
+                "default": "all",
+                "enum": [
+                  "all",
+                  "changedLines"
+                ],
+                "markdownEnumDescriptions": [
+                  "Report everywhere.",
+                  "Only report on lines changed since the last commit (git)."
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "workspace": {
+            "type": "object",
+            "properties": {
+              "maxFiles": {
+                "type": "number",
+                "description": "Maximum number of files scanned for workspace statistics and conversion.",
+                "markdownDescription": "Maximum number of files scanned for workspace statistics and conversion.",
+                "default": 5000,
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

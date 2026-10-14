@@ -1,0 +1,36 @@
+{
+  "name": "px-to-rem-toolkit",
+  "version": "2.0.0",
+  "description": "Smart px → rem/em/vw conversion, accessibility and design-token checks for CSS, SCSS, Less, Stylus, Vue, Svelte, Astro, styled-components and Tailwind — the command line twin of the PX to REM Toolkit VS Code extension.",
+  "license": "MIT",
+  "author": "Louis Mudrack",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/louis-mudrack/px-to-rem",
+    "directory": "cli"
+  },
+  "homepage": "https://github.com/louis-mudrack/px-to-rem/tree/master/cli#readme",
+  "bin": {
+    "px-to-rem": "dist/px-to-rem.mjs",
+    "px-to-rem-toolkit": "dist/px-to-rem.mjs"
+  },
+  "files": [
+    "dist/px-to-rem.mjs",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "px",
+    "rem",
+    "css",
+    "scss",
+    "lint",
+    "accessibility",
+    "wcag",
+    "design-tokens",
+    "tailwind",
+    "cli"
+  ]
+}
