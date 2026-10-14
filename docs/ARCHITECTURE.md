@@ -134,3 +134,20 @@ The CLI uses defaults → `.pxtoremrc.json` → overrides → CLI flags.
   features.
 * The workspace index scans in the background, is cancellable, and updates
   incrementally from file watchers.
+
+## Testing
+
+| Layer | How | Command |
+|---|---|---|
+| Engine | vitest unit tests per module (`test/unit`) | `npm test` |
+| CLI | vitest against temporary projects, including git (`test/cli`) | `npm test` |
+| Translations | every bundle covers every string and keeps placeholders (`test/unit/l10n.test.ts`) | `npm test` |
+| Generated files | settings, schema and l10n source are up to date | `npm run check:generated` |
+| Extension | the real extension in VS Code 1.97 against `test/integration/fixture` | `npm run test:integration` (needs a display; `xvfb-run -a` on Linux) |
+
+`npm run check` runs everything except the integration tests.
+
+## Generated files
+
+- `package.json` → `contributes.configuration`, `schemas/pxtoremrc.schema.json` and the `config.*` entries of `package.nls.json` come from `OPTION_DEFS` in `src/core/options.ts` (`npm run gen`).
+- `l10n/bundle.l10n.json` collects every `vscode.l10n.t` literal, engine message and dashboard string (`npm run l10n`). Translations live next to it as `bundle.l10n.<locale>.json`, manifest translations as `package.nls.<locale>.json`.

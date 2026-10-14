@@ -21,7 +21,12 @@ interface CacheEntry {
     doc: ParsedDocument;
 }
 
-const SUPPORTED_SCHEMES = new Set(['file', 'untitled', 'vscode-vfs', 'vscode-remote', 'vscode-userdata', 'vscode-notebook-cell', 'memfs', 'github', 'vsls']);
+/**
+ * Views of content that is not the user's to edit (logs, old git revisions,
+ * diff inputs). Everything else works, including web file systems
+ * (vscode-vfs, tmp, memfs, …) whose schemes we cannot enumerate.
+ */
+const IGNORED_SCHEMES = new Set(['output', 'debug', 'git', 'gitfs', 'vscode-scm', 'gitlens', 'review', 'pr', 'conflictResolution', 'merge-conflict.conflict-diff', 'vscode-settings']);
 
 /** Shared access to parsed documents, options and project context. */
 export class Engine implements vscode.Disposable {
@@ -64,14 +69,14 @@ export class Engine implements vscode.Disposable {
     /** Whether the extension works in this document at all. */
     isSupported(document: vscode.TextDocument): boolean {
         const languageId = this.languageId(document);
-        if (!SUPPORTED_SCHEMES.has(document.uri.scheme) || !hostForLanguage(languageId)) {
+        if (IGNORED_SCHEMES.has(document.uri.scheme) || !hostForLanguage(languageId)) {
             return false;
         }
         const options = this.options(document);
         if (!options.languages.includes(languageId)) {
             return false;
         }
-        if (document.uri.scheme === 'file' || document.uri.scheme === 'vscode-vfs') {
+        if (document.uri.scheme !== 'untitled') {
             const folder = vscode.workspace.getWorkspaceFolder(document.uri);
             if (folder && this.index.isIgnored(document.uri, folder, options)) {
                 return false;
