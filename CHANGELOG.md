@@ -1,8 +1,12 @@
 # Changelog
 
+## 2.0.1
+
+- New icon: a type scale of three growing letters, legible at every size in light and dark themes.
+
 ## 2.0.0
 
-A rewrite around a CSS-aware engine. The extension is now **PX to REM Toolkit**: same Marketplace id, a new icon, many more ways to keep CSS scalable.
+A rewrite around a CSS-aware engine. The extension is now **PX to REM Toolkit**: same Marketplace id, many more ways to keep CSS scalable.
 
 ### Breaking changes
 
