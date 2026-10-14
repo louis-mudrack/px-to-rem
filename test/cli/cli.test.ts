@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -105,6 +105,21 @@ describe('px-to-rem CLI', () => {
             ['a.css', [2]],
             ['new.css', [1]],
         ]);
+    });
+
+    it('--changed works when the project path is a link (macOS /var, Windows 8.3 temp paths)', async () => {
+        const dir = project({ 'a.css': '.a { padding: 16px; }\n' });
+        const git = (...args: string[]) => execFileSync('git', args, { cwd: dir, stdio: 'pipe' });
+        git('init', '-q');
+        git('-c', 'user.email=t@example.com', '-c', 'user.name=t', 'add', '-A');
+        git('-c', 'user.email=t@example.com', '-c', 'user.name=t', 'commit', '-qm', 'init');
+        writeFileSync(join(dir, 'a.css'), '.a { padding: 16px; }\n.b { margin: 8px; }\n');
+        const link = `${dir}-link`;
+        symlinkSync(dir, link, 'junction');
+        dirs.push(link);
+        const result = await cli(link, 'check', '--changed', '--reporter', 'json');
+        const found = JSON.parse(result.out).map((f: { file: string; findings: { line: number }[] }) => [f.file, f.findings.map(x => x.line)]);
+        expect(found).toEqual([['a.css', [2]]]);
     });
 
     it('rebases rem values', async () => {

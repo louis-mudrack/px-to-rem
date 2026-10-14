@@ -73,8 +73,12 @@ const yieldToEventLoop = () => new Promise<void>(resolve => setTimeout(resolve, 
  * watchers.
  */
 export class WorkspaceIndex implements vscode.Disposable {
-    private readonly files = new Map<string, FileFacts>();
-    private readonly folders = new Map<string, FolderFacts>();
+    private files = new Map<string, FileFacts>();
+    private folders = new Map<string, FolderFacts>();
+    /** The file map a running scan is filling; replaces `files` when the scan completes. */
+    private building: Map<string, FileFacts> | undefined;
+    /** Increments per scan, so a slower, older scan never replaces a newer one. */
+    private generation = 0;
     private readonly emitter = new vscode.EventEmitter<void>();
     private readonly disposables: vscode.Disposable[] = [];
     private changeTimer: ReturnType<typeof setTimeout> | undefined;
@@ -92,13 +96,18 @@ export class WorkspaceIndex implements vscode.Disposable {
         const watcher = vscode.workspace.createFileSystemWatcher('**/*.{css,scss,sass,less,styl,stylus,pcss,postcss,vue,svelte,astro,json}');
         const configWatcher = vscode.workspace.createFileSystemWatcher('**/{package.json,postcss.config.*,.postcssrc*,tailwind.config.*,.gitignore}');
         const onFile = (uri: vscode.Uri) => void this.updateFile(uri);
-        const onConfig = () => void this.scanFolders().then(() => this.changed());
+        const onConfig = () =>
+            void this.readFolders().then(folders => {
+                this.folders = folders;
+                this.changed();
+            });
         this.disposables.push(
             watcher,
             configWatcher,
             watcher.onDidChange(onFile),
             watcher.onDidCreate(onFile),
             watcher.onDidDelete(uri => {
+                this.building?.delete(uri.toString());
                 if (this.files.delete(uri.toString())) {
                     this.changed();
                 }
@@ -138,18 +147,42 @@ export class WorkspaceIndex implements vscode.Disposable {
         return this.scanning;
     }
 
+    /**
+     * Builds a complete new index and swaps it in at the end. Until then the
+     * previous facts stay in place, so a rescan (after every settings change)
+     * never shows providers an empty project with the default root font size
+     * and no tokens.
+     */
     private async scan(): Promise<void> {
-        await this.scanFolders();
-        this.files.clear();
-        for (const folder of vscode.workspace.workspaceFolders ?? []) {
-            const options = this.config.optionsFor(folder.uri);
-            const uris = await this.findStyleFiles(folder, options);
-            let n = 0;
-            for (const uri of uris) {
-                await this.indexFile(uri, folder, options);
-                if (++n % 40 === 0) {
-                    await yieldToEventLoop();
+        const generation = ++this.generation;
+        const folders = await this.readFolders();
+        if (generation !== this.generation) {
+            return;
+        }
+        this.folders = folders;
+        const files = new Map<string, FileFacts>();
+        this.building = files;
+        try {
+            for (const folder of vscode.workspace.workspaceFolders ?? []) {
+                const options = this.config.optionsFor(folder.uri);
+                const uris = await this.findStyleFiles(folder, options);
+                let n = 0;
+                for (const uri of uris) {
+                    if (generation !== this.generation) {
+                        return;
+                    }
+                    setFacts(files, uri, await this.readFacts(uri, options));
+                    if (++n % 40 === 0) {
+                        await yieldToEventLoop();
+                    }
                 }
+            }
+            if (generation === this.generation) {
+                this.files = files;
+            }
+        } finally {
+            if (this.building === files) {
+                this.building = undefined;
             }
         }
     }
@@ -205,26 +238,30 @@ export class WorkspaceIndex implements vscode.Disposable {
         if (this.isIgnored(uri, folder, options)) {
             return;
         }
-        await this.indexFile(uri, folder, options);
+        const facts = await this.readFacts(uri, options);
+        setFacts(this.files, uri, facts);
+        // A running scan may have read this file already; keep its result current too.
+        if (this.building) {
+            setFacts(this.building, uri, facts);
+        }
         this.changed();
     }
 
-    private async indexFile(uri: vscode.Uri, folder: vscode.WorkspaceFolder, options: Options): Promise<void> {
+    /** The facts of one file, or undefined when it defines nothing the index cares about. */
+    private async readFacts(uri: vscode.Uri, options: Options): Promise<FileFacts | undefined> {
         const text = await readText(uri);
         if (text === undefined) {
-            this.files.delete(uri.toString());
-            return;
+            return undefined;
         }
         const relativePath = vscode.workspace.asRelativePath(uri, false);
         const looksLikeTokenFile = TOKEN_FILE_PATH.test(relativePath);
         if (uri.path.toLowerCase().endsWith('.json')) {
             const tokens = options.tokens.enable ? extractTokensFromJson(text, relativePath, options, 16) : [];
-            this.files.set(uri.toString(), { uri, relativePath, rootCandidates: [], remFunctions: [], tokens, looksLikeTokenFile: true });
-            return;
+            return { uri, relativePath, rootCandidates: [], remFunctions: [], tokens, looksLikeTokenFile: true };
         }
         const languageId = languageForFileName(uri.path);
         if (!languageId) {
-            return;
+            return undefined;
         }
         // Cheap pre-check: most files define nothing the index cares about.
         const interesting =
@@ -234,8 +271,7 @@ export class WorkspaceIndex implements vscode.Disposable {
             text.includes('--') ||
             /^\s*[\w-]+\s*=/m.test(text);
         if (!interesting) {
-            this.files.delete(uri.toString());
-            return;
+            return undefined;
         }
         const doc = parseDocument(text, languageId);
         const facts: FileFacts = {
@@ -249,12 +285,11 @@ export class WorkspaceIndex implements vscode.Disposable {
         if (/tailwind|@theme|@apply/.test(text)) {
             facts.tailwind = readTailwindCss(doc, 16);
         }
-        this.files.set(uri.toString(), facts);
-        void folder;
+        return facts;
     }
 
-    private async scanFolders(): Promise<void> {
-        this.folders.clear();
+    private async readFolders(): Promise<Map<string, FolderFacts>> {
+        const folders = new Map<string, FolderFacts>();
         for (const folder of vscode.workspace.workspaceFolders ?? []) {
             const facts: FolderFacts = { packages: [], tailwindConfigFile: false, gitignore: [] };
             const packageFiles = await vscode.workspace.findFiles(
@@ -301,8 +336,9 @@ export class WorkspaceIndex implements vscode.Disposable {
             if (gitignoreText) {
                 facts.gitignore = gitignoreToGlobs(gitignoreText);
             }
-            this.folders.set(folder.uri.toString(), facts);
+            folders.set(folder.uri.toString(), facts);
         }
+        return folders;
     }
 
     filesIn(folder: vscode.WorkspaceFolder | undefined): FileFacts[] {
@@ -322,5 +358,13 @@ export class WorkspaceIndex implements vscode.Disposable {
         for (const d of this.disposables) {
             d.dispose();
         }
+    }
+}
+
+function setFacts(files: Map<string, FileFacts>, uri: vscode.Uri, facts: FileFacts | undefined): void {
+    if (facts) {
+        files.set(uri.toString(), facts);
+    } else {
+        files.delete(uri.toString());
     }
 }

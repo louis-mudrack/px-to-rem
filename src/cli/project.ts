@@ -238,7 +238,9 @@ export async function buildProject(loaded: LoadedConfig, options: Options, expli
 /** Lines changed against a git ref (default HEAD), per absolute file path. `'all'` for untracked files. */
 export function changedLines(root: string, base = 'HEAD'): Map<string, Set<number> | 'all'> {
     const out = new Map<string, Set<number> | 'all'>();
-    const gitRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: root, encoding: 'utf8' }).trim();
+    // Relative to `root` rather than --show-toplevel, which resolves links and Windows 8.3 names and
+    // would then spell paths differently from the files found under `root`.
+    const gitRoot = resolve(root, execFileSync('git', ['rev-parse', '--show-cdup'], { cwd: root, encoding: 'utf8' }).trim() || '.');
     const diff = execFileSync('git', ['-c', 'core.quotePath=false', 'diff', '-U0', '--no-color', '--no-ext-diff', base], { cwd: root, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
     for (const [path, fileDiff] of splitDiffByFile(diff)) {
         out.set(resolve(gitRoot, path), changedLinesFromDiff(fileDiff));
